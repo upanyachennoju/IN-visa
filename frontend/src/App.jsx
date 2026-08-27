@@ -43,6 +43,7 @@ const EMPTY_APPLICATION = {
   previousIndiaTravel: null,
   travelHistory: null,
   references: null,
+  backgroundAnswers: null,
 };
 
 const EMPTY_CONTEXT_FORM = {
@@ -167,6 +168,21 @@ const EMPTY_REFERENCES_FORM = {
   homeCountryRefPhone: '',
 };
 
+const EMPTY_BACKGROUND_FORM = {
+  arrestOrConviction: '',
+  arrestOrConvictionDetails: '',
+  refusedEntryOrDeported: '',
+  refusedEntryOrDeportedDetails: '',
+  traffickingOrDrugs: '',
+  traffickingOrDrugsDetails: '',
+  cyberOrTerrorism: '',
+  cyberOrTerrorismDetails: '',
+  terrorismViews: '',
+  terrorismViewsDetails: '',
+  asylum: '',
+  asylumDetails: '',
+};
+
 function parseRoute() {
   const hash = window.location.hash.replace(/^#\/?/, '');
   if (hash.startsWith('resume')) {
@@ -195,6 +211,7 @@ function normalizeResponse(data) {
     previousIndiaTravel: data.previousIndiaTravel || null,
     travelHistory: data.travelHistory || null,
     references: data.references || null,
+    backgroundAnswers: data.backgroundAnswers || null,
     contact: data.contact || null,
   };
 }
@@ -367,6 +384,42 @@ function buildReferencesForm(application) {
   };
 }
 
+function buildBackgroundForm(application) {
+  const backgroundAnswers = application.backgroundAnswers || {};
+  return {
+    arrestOrConviction:
+      backgroundAnswers.arrestOrConviction === null || backgroundAnswers.arrestOrConviction === undefined
+        ? ''
+        : String(Boolean(backgroundAnswers.arrestOrConviction)),
+    arrestOrConvictionDetails: backgroundAnswers.arrestOrConvictionDetails || '',
+    refusedEntryOrDeported:
+      backgroundAnswers.refusedEntryOrDeported === null || backgroundAnswers.refusedEntryOrDeported === undefined
+        ? ''
+        : String(Boolean(backgroundAnswers.refusedEntryOrDeported)),
+    refusedEntryOrDeportedDetails: backgroundAnswers.refusedEntryOrDeportedDetails || '',
+    traffickingOrDrugs:
+      backgroundAnswers.traffickingOrDrugs === null || backgroundAnswers.traffickingOrDrugs === undefined
+        ? ''
+        : String(Boolean(backgroundAnswers.traffickingOrDrugs)),
+    traffickingOrDrugsDetails: backgroundAnswers.traffickingOrDrugsDetails || '',
+    cyberOrTerrorism:
+      backgroundAnswers.cyberOrTerrorism === null || backgroundAnswers.cyberOrTerrorism === undefined
+        ? ''
+        : String(Boolean(backgroundAnswers.cyberOrTerrorism)),
+    cyberOrTerrorismDetails: backgroundAnswers.cyberOrTerrorismDetails || '',
+    terrorismViews:
+      backgroundAnswers.terrorismViews === null || backgroundAnswers.terrorismViews === undefined
+        ? ''
+        : String(Boolean(backgroundAnswers.terrorismViews)),
+    terrorismViewsDetails: backgroundAnswers.terrorismViewsDetails || '',
+    asylum:
+      backgroundAnswers.asylum === null || backgroundAnswers.asylum === undefined
+        ? ''
+        : String(Boolean(backgroundAnswers.asylum)),
+    asylumDetails: backgroundAnswers.asylumDetails || '',
+  };
+}
+
 function validateContextForm(form) {
   const errors = {};
   if (!form.countryApplyingFrom.trim()) errors.countryApplyingFrom = 'Required.';
@@ -508,6 +561,27 @@ function validateReferencesForm(form) {
   return errors;
 }
 
+function validateBackgroundForm(form) {
+  const errors = {};
+  const checks = [
+    ['arrestOrConviction', 'arrestOrConviction', 'arrestOrConvictionDetails'],
+    ['refusedEntryOrDeported', 'refusedEntryOrDeported', 'refusedEntryOrDeportedDetails'],
+    ['traffickingOrDrugs', 'traffickingOrDrugs', 'traffickingOrDrugsDetails'],
+    ['cyberOrTerrorism', 'cyberOrTerrorism', 'cyberOrTerrorismDetails'],
+    ['terrorismViews', 'terrorismViews', 'terrorismViewsDetails'],
+    ['asylum', 'asylum', 'asylumDetails'],
+  ];
+  for (const [field, yesField, detailField] of checks) {
+    if (form[field] === '') {
+      errors[field] = 'Required.';
+    }
+    if (form[yesField] === 'true' && !form[detailField].trim()) {
+      errors[detailField] = 'Required when yes.';
+    }
+  }
+  return errors;
+}
+
 function splitCsvList(value) {
   return value
     .split(',')
@@ -539,6 +613,7 @@ export default function App() {
   const [previousIndiaTravelForm, setPreviousIndiaTravelForm] = useState(EMPTY_PREVIOUS_INDIA_TRAVEL_FORM);
   const [travelHistoryForm, setTravelHistoryForm] = useState(EMPTY_TRAVEL_HISTORY_FORM);
   const [referencesForm, setReferencesForm] = useState(EMPTY_REFERENCES_FORM);
+  const [backgroundForm, setBackgroundForm] = useState(EMPTY_BACKGROUND_FORM);
   const [emailOtp, setEmailOtp] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
   const [fieldErrors, setFieldErrors] = useState({
@@ -552,6 +627,7 @@ export default function App() {
     PREVIOUS_INDIA_TRAVEL: {},
     TRAVEL_HISTORY: {},
     REFERENCES: {},
+    BACKGROUND_ANSWERS: {},
     CONTACT: {},
   });
   const [simulatedOtps, setSimulatedOtps] = useState({ email: '', phone: '' });
@@ -590,6 +666,7 @@ export default function App() {
           setPreviousIndiaTravelForm(buildPreviousIndiaTravelForm(nextApplication));
           setTravelHistoryForm(buildTravelHistoryForm(nextApplication));
           setReferencesForm(buildReferencesForm(nextApplication));
+          setBackgroundForm(buildBackgroundForm(nextApplication));
           setContactForm(buildContactForm(nextApplication));
           setEmailOtp('');
           setPhoneOtp('');
@@ -612,6 +689,7 @@ export default function App() {
       setPreviousIndiaTravelForm(EMPTY_PREVIOUS_INDIA_TRAVEL_FORM);
       setTravelHistoryForm(EMPTY_TRAVEL_HISTORY_FORM);
       setReferencesForm(EMPTY_REFERENCES_FORM);
+      setBackgroundForm(EMPTY_BACKGROUND_FORM);
       setContactForm(EMPTY_CONTACT_FORM);
       setEmailOtp('');
       setPhoneOtp('');
@@ -626,6 +704,7 @@ export default function App() {
         PREVIOUS_INDIA_TRAVEL: {},
         TRAVEL_HISTORY: {},
         REFERENCES: {},
+        BACKGROUND_ANSWERS: {},
         CONTACT: {},
       });
       setVerificationResult(null);
@@ -1016,6 +1095,50 @@ export default function App() {
       setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
     } catch {
       setError('References save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveBackgroundAnswers(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateBackgroundForm(backgroundForm);
+    setFieldErrors((current) => ({ ...current, BACKGROUND_ANSWERS: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/background-answers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          arrestOrConviction: backgroundForm.arrestOrConviction === 'true',
+          arrestOrConvictionDetails: backgroundForm.arrestOrConvictionDetails,
+          refusedEntryOrDeported: backgroundForm.refusedEntryOrDeported === 'true',
+          refusedEntryOrDeportedDetails: backgroundForm.refusedEntryOrDeportedDetails,
+          traffickingOrDrugs: backgroundForm.traffickingOrDrugs === 'true',
+          traffickingOrDrugsDetails: backgroundForm.traffickingOrDrugsDetails,
+          cyberOrTerrorism: backgroundForm.cyberOrTerrorism === 'true',
+          cyberOrTerrorismDetails: backgroundForm.cyberOrTerrorismDetails,
+          terrorismViews: backgroundForm.terrorismViews === 'true',
+          terrorismViewsDetails: backgroundForm.terrorismViewsDetails,
+          asylum: backgroundForm.asylum === 'true',
+          asylumDetails: backgroundForm.asylumDetails,
+        }),
+      });
+      if (!response.ok) {
+        setError('Background Answers save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setBackgroundForm(buildBackgroundForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Background Answers save failed. Make sure the backend is running on port 8080.');
     }
   }
 
@@ -1976,6 +2099,148 @@ export default function App() {
                     <input value={referencesForm.homeCountryRefPhone} onChange={(event) => setReferencesForm({ ...referencesForm, homeCountryRefPhone: event.target.value })} type="text" />
                     {fieldErrors.REFERENCES.homeCountryRefPhone ? <span className="field-error">{fieldErrors.REFERENCES.homeCountryRefPhone}</span> : null}
                   </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'BACKGROUND_ANSWERS' ? (
+              <section className="section-card">
+                <h2>Background Questions</h2>
+                <form className="form-grid" onSubmit={saveBackgroundAnswers}>
+                  <label>
+                    Arrest or conviction
+                    <select
+                      value={backgroundForm.arrestOrConviction}
+                      onChange={(event) => setBackgroundForm({ ...backgroundForm, arrestOrConviction: event.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.BACKGROUND_ANSWERS.arrestOrConviction ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.arrestOrConviction}</span> : null}
+                  </label>
+                  {backgroundForm.arrestOrConviction === 'true' ? (
+                    <label>
+                      Arrest or conviction details
+                      <textarea
+                        value={backgroundForm.arrestOrConvictionDetails}
+                        onChange={(event) => setBackgroundForm({ ...backgroundForm, arrestOrConvictionDetails: event.target.value })}
+                        rows="3"
+                      />
+                      {fieldErrors.BACKGROUND_ANSWERS.arrestOrConvictionDetails ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.arrestOrConvictionDetails}</span> : null}
+                    </label>
+                  ) : null}
+                  <label>
+                    Refused entry or deported
+                    <select
+                      value={backgroundForm.refusedEntryOrDeported}
+                      onChange={(event) => setBackgroundForm({ ...backgroundForm, refusedEntryOrDeported: event.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.BACKGROUND_ANSWERS.refusedEntryOrDeported ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.refusedEntryOrDeported}</span> : null}
+                  </label>
+                  {backgroundForm.refusedEntryOrDeported === 'true' ? (
+                    <label>
+                      Refused entry or deported details
+                      <textarea
+                        value={backgroundForm.refusedEntryOrDeportedDetails}
+                        onChange={(event) => setBackgroundForm({ ...backgroundForm, refusedEntryOrDeportedDetails: event.target.value })}
+                        rows="3"
+                      />
+                      {fieldErrors.BACKGROUND_ANSWERS.refusedEntryOrDeportedDetails ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.refusedEntryOrDeportedDetails}</span> : null}
+                    </label>
+                  ) : null}
+                  <label>
+                    Trafficking or drugs
+                    <select
+                      value={backgroundForm.traffickingOrDrugs}
+                      onChange={(event) => setBackgroundForm({ ...backgroundForm, traffickingOrDrugs: event.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.BACKGROUND_ANSWERS.traffickingOrDrugs ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.traffickingOrDrugs}</span> : null}
+                  </label>
+                  {backgroundForm.traffickingOrDrugs === 'true' ? (
+                    <label>
+                      Trafficking or drugs details
+                      <textarea
+                        value={backgroundForm.traffickingOrDrugsDetails}
+                        onChange={(event) => setBackgroundForm({ ...backgroundForm, traffickingOrDrugsDetails: event.target.value })}
+                        rows="3"
+                      />
+                      {fieldErrors.BACKGROUND_ANSWERS.traffickingOrDrugsDetails ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.traffickingOrDrugsDetails}</span> : null}
+                    </label>
+                  ) : null}
+                  <label>
+                    Cyber or terrorism
+                    <select
+                      value={backgroundForm.cyberOrTerrorism}
+                      onChange={(event) => setBackgroundForm({ ...backgroundForm, cyberOrTerrorism: event.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.BACKGROUND_ANSWERS.cyberOrTerrorism ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.cyberOrTerrorism}</span> : null}
+                  </label>
+                  {backgroundForm.cyberOrTerrorism === 'true' ? (
+                    <label>
+                      Cyber or terrorism details
+                      <textarea
+                        value={backgroundForm.cyberOrTerrorismDetails}
+                        onChange={(event) => setBackgroundForm({ ...backgroundForm, cyberOrTerrorismDetails: event.target.value })}
+                        rows="3"
+                      />
+                      {fieldErrors.BACKGROUND_ANSWERS.cyberOrTerrorismDetails ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.cyberOrTerrorismDetails}</span> : null}
+                    </label>
+                  ) : null}
+                  <label>
+                    Terrorism views
+                    <select
+                      value={backgroundForm.terrorismViews}
+                      onChange={(event) => setBackgroundForm({ ...backgroundForm, terrorismViews: event.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.BACKGROUND_ANSWERS.terrorismViews ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.terrorismViews}</span> : null}
+                  </label>
+                  {backgroundForm.terrorismViews === 'true' ? (
+                    <label>
+                      Terrorism views details
+                      <textarea
+                        value={backgroundForm.terrorismViewsDetails}
+                        onChange={(event) => setBackgroundForm({ ...backgroundForm, terrorismViewsDetails: event.target.value })}
+                        rows="3"
+                      />
+                      {fieldErrors.BACKGROUND_ANSWERS.terrorismViewsDetails ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.terrorismViewsDetails}</span> : null}
+                    </label>
+                  ) : null}
+                  <label>
+                    Asylum
+                    <select value={backgroundForm.asylum} onChange={(event) => setBackgroundForm({ ...backgroundForm, asylum: event.target.value })}>
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.BACKGROUND_ANSWERS.asylum ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.asylum}</span> : null}
+                  </label>
+                  {backgroundForm.asylum === 'true' ? (
+                    <label>
+                      Asylum details
+                      <textarea
+                        value={backgroundForm.asylumDetails}
+                        onChange={(event) => setBackgroundForm({ ...backgroundForm, asylumDetails: event.target.value })}
+                        rows="3"
+                      />
+                      {fieldErrors.BACKGROUND_ANSWERS.asylumDetails ? <span className="field-error">{fieldErrors.BACKGROUND_ANSWERS.asylumDetails}</span> : null}
+                    </label>
+                  ) : null}
                   <button type="submit">Save and continue</button>
                 </form>
               </section>

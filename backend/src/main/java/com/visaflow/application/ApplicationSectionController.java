@@ -67,4 +67,9 @@ public class ApplicationSectionController {
 	public ApplicationStateResponse saveReferences(@PathVariable String tempId, @RequestBody ReferencesRequest request) {
 		return service.saveReferences(tempId, request);
 	}
+
+	@PostMapping("/{tempId}/background-answers")
+	public ApplicationStateResponse saveBackgroundAnswers(@PathVariable String tempId, @RequestBody BackgroundAnswersRequest request) {
+		return service.saveBackgroundAnswers(tempId, request);
+	}
 }

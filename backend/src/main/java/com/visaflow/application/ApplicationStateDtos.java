@@ -19,6 +19,7 @@ record ApplicationStateResponse(
 	PreviousIndiaTravelState previousIndiaTravel,
 	TravelHistoryState travelHistory,
 	ReferencesState references,
+	BackgroundAnswersState backgroundAnswers,
 	ContactState contact
 ) {
 }
@@ -155,6 +156,22 @@ record HomeCountryRefState(
 	String name,
 	String address,
 	String phone
+) {
+}
+
+record BackgroundAnswersState(
+	Boolean arrestOrConviction,
+	String arrestOrConvictionDetails,
+	Boolean refusedEntryOrDeported,
+	String refusedEntryOrDeportedDetails,
+	Boolean traffickingOrDrugs,
+	String traffickingOrDrugsDetails,
+	Boolean cyberOrTerrorism,
+	String cyberOrTerrorismDetails,
+	Boolean terrorismViews,
+	String terrorismViewsDetails,
+	Boolean asylum,
+	String asylumDetails
 ) {
 }
 

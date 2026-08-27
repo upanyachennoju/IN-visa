@@ -1059,14 +1059,116 @@ public class Application {
 
 	@Embeddable
 	public static class BackgroundAnswers {
-		private String arrestOrConviction;
-		private String refusedEntryOrDeported;
-		private String traffickingOrDrugs;
-		private String cyberOrTerrorism;
-		private String terrorismViews;
-		private String asylum;
+		private Boolean arrestOrConviction;
+		private String arrestOrConvictionDetails;
+		private Boolean refusedEntryOrDeported;
+		private String refusedEntryOrDeportedDetails;
+		private Boolean traffickingOrDrugs;
+		private String traffickingOrDrugsDetails;
+		private Boolean cyberOrTerrorism;
+		private String cyberOrTerrorismDetails;
+		private Boolean terrorismViews;
+		private String terrorismViewsDetails;
+		private Boolean asylum;
+		private String asylumDetails;
 
 		protected BackgroundAnswers() {
+		}
+
+		public Boolean getArrestOrConviction() {
+			return arrestOrConviction;
+		}
+
+		public void setArrestOrConviction(Boolean arrestOrConviction) {
+			this.arrestOrConviction = arrestOrConviction;
+		}
+
+		public String getArrestOrConvictionDetails() {
+			return arrestOrConvictionDetails;
+		}
+
+		public void setArrestOrConvictionDetails(String arrestOrConvictionDetails) {
+			this.arrestOrConvictionDetails = arrestOrConvictionDetails;
+		}
+
+		public Boolean getRefusedEntryOrDeported() {
+			return refusedEntryOrDeported;
+		}
+
+		public void setRefusedEntryOrDeported(Boolean refusedEntryOrDeported) {
+			this.refusedEntryOrDeported = refusedEntryOrDeported;
+		}
+
+		public String getRefusedEntryOrDeportedDetails() {
+			return refusedEntryOrDeportedDetails;
+		}
+
+		public void setRefusedEntryOrDeportedDetails(String refusedEntryOrDeportedDetails) {
+			this.refusedEntryOrDeportedDetails = refusedEntryOrDeportedDetails;
+		}
+
+		public Boolean getTraffickingOrDrugs() {
+			return traffickingOrDrugs;
+		}
+
+		public void setTraffickingOrDrugs(Boolean traffickingOrDrugs) {
+			this.traffickingOrDrugs = traffickingOrDrugs;
+		}
+
+		public String getTraffickingOrDrugsDetails() {
+			return traffickingOrDrugsDetails;
+		}
+
+		public void setTraffickingOrDrugsDetails(String traffickingOrDrugsDetails) {
+			this.traffickingOrDrugsDetails = traffickingOrDrugsDetails;
+		}
+
+		public Boolean getCyberOrTerrorism() {
+			return cyberOrTerrorism;
+		}
+
+		public void setCyberOrTerrorism(Boolean cyberOrTerrorism) {
+			this.cyberOrTerrorism = cyberOrTerrorism;
+		}
+
+		public String getCyberOrTerrorismDetails() {
+			return cyberOrTerrorismDetails;
+		}
+
+		public void setCyberOrTerrorismDetails(String cyberOrTerrorismDetails) {
+			this.cyberOrTerrorismDetails = cyberOrTerrorismDetails;
+		}
+
+		public Boolean getTerrorismViews() {
+			return terrorismViews;
+		}
+
+		public void setTerrorismViews(Boolean terrorismViews) {
+			this.terrorismViews = terrorismViews;
+		}
+
+		public String getTerrorismViewsDetails() {
+			return terrorismViewsDetails;
+		}
+
+		public void setTerrorismViewsDetails(String terrorismViewsDetails) {
+			this.terrorismViewsDetails = terrorismViewsDetails;
+		}
+
+		public Boolean getAsylum() {
+			return asylum;
+		}
+
+		public void setAsylum(Boolean asylum) {
+			this.asylum = asylum;
+		}
+
+		public String getAsylumDetails() {
+			return asylumDetails;
+		}
+
+		public void setAsylumDetails(String asylumDetails) {
+			this.asylumDetails = asylumDetails;
 		}
 	}
 
@@ -1180,6 +1282,14 @@ public class Application {
 
 	public void setReferences(References references) {
 		this.references = references;
+	}
+
+	public BackgroundAnswers getBackgroundAnswers() {
+		return backgroundAnswers;
+	}
+
+	public void setBackgroundAnswers(BackgroundAnswers backgroundAnswers) {
+		this.backgroundAnswers = backgroundAnswers;
 	}
 
 	public Contact getContact() {

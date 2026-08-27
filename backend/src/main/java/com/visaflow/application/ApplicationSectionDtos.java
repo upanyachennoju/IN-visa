@@ -129,6 +129,23 @@ record ReferencesRequest(
 ) {
 }
 
+record BackgroundAnswersRequest(
+	String tempId,
+	Boolean arrestOrConviction,
+	String arrestOrConvictionDetails,
+	Boolean refusedEntryOrDeported,
+	String refusedEntryOrDeportedDetails,
+	Boolean traffickingOrDrugs,
+	String traffickingOrDrugsDetails,
+	Boolean cyberOrTerrorism,
+	String cyberOrTerrorismDetails,
+	Boolean terrorismViews,
+	String terrorismViewsDetails,
+	Boolean asylum,
+	String asylumDetails
+) {
+}
+
 record IndiaRefRequest(
 	String name,
 	String address,

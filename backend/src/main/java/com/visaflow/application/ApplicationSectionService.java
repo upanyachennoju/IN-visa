@@ -351,6 +351,37 @@ public class ApplicationSectionService {
 		return toResponse(application);
 	}
 
+	public ApplicationStateResponse saveBackgroundAnswers(String tempId, BackgroundAnswersRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.arrestOrConviction(), "arrestOrConviction");
+		validateRequired(request.refusedEntryOrDeported(), "refusedEntryOrDeported");
+		validateRequired(request.traffickingOrDrugs(), "traffickingOrDrugs");
+		validateRequired(request.cyberOrTerrorism(), "cyberOrTerrorism");
+		validateRequired(request.terrorismViews(), "terrorismViews");
+		validateRequired(request.asylum(), "asylum");
+
+		Application.BackgroundAnswers backgroundAnswers = new Application.BackgroundAnswers();
+		backgroundAnswers.setArrestOrConviction(request.arrestOrConviction());
+		backgroundAnswers.setArrestOrConvictionDetails(Boolean.TRUE.equals(request.arrestOrConviction()) ? request.arrestOrConvictionDetails() : null);
+		backgroundAnswers.setRefusedEntryOrDeported(request.refusedEntryOrDeported());
+		backgroundAnswers.setRefusedEntryOrDeportedDetails(Boolean.TRUE.equals(request.refusedEntryOrDeported()) ? request.refusedEntryOrDeportedDetails() : null);
+		backgroundAnswers.setTraffickingOrDrugs(request.traffickingOrDrugs());
+		backgroundAnswers.setTraffickingOrDrugsDetails(Boolean.TRUE.equals(request.traffickingOrDrugs()) ? request.traffickingOrDrugsDetails() : null);
+		backgroundAnswers.setCyberOrTerrorism(request.cyberOrTerrorism());
+		backgroundAnswers.setCyberOrTerrorismDetails(Boolean.TRUE.equals(request.cyberOrTerrorism()) ? request.cyberOrTerrorismDetails() : null);
+		backgroundAnswers.setTerrorismViews(request.terrorismViews());
+		backgroundAnswers.setTerrorismViewsDetails(Boolean.TRUE.equals(request.terrorismViews()) ? request.terrorismViewsDetails() : null);
+		backgroundAnswers.setAsylum(request.asylum());
+		backgroundAnswers.setAsylumDetails(Boolean.TRUE.equals(request.asylum()) ? request.asylumDetails() : null);
+
+		application.setBackgroundAnswers(backgroundAnswers);
+		application.setCurrentSection("DOCUMENTS");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
 	public ApplicationStateResponse loadState(String tempId) {
 		return toResponse(loadApplication(tempId));
 	}
@@ -394,6 +425,7 @@ public class ApplicationSectionService {
 			toPreviousIndiaTravel(application.getPreviousIndiaTravel()),
 			toTravelHistory(application.getTravelHistory()),
 			toReferences(application.getReferences()),
+			toBackgroundAnswers(application.getBackgroundAnswers()),
 			toContact(application.getContact())
 		);
 	}
@@ -429,6 +461,9 @@ public class ApplicationSectionService {
 		}
 		if (application.getReferences() != null) {
 			sections.add("REFERENCES");
+		}
+		if (application.getBackgroundAnswers() != null) {
+			sections.add("BACKGROUND_ANSWERS");
 		}
 		if (application.getContact() != null && application.getContact().isEmailVerified() && application.getContact().isPhoneVerified()) {
 			sections.add("CONTACT");
@@ -621,6 +656,26 @@ public class ApplicationSectionService {
 			homeCountryRef.getName(),
 			homeCountryRef.getAddress(),
 			homeCountryRef.getPhone()
+		);
+	}
+
+	private static BackgroundAnswersState toBackgroundAnswers(Application.BackgroundAnswers backgroundAnswers) {
+		if (backgroundAnswers == null) {
+			return null;
+		}
+		return new BackgroundAnswersState(
+			backgroundAnswers.getArrestOrConviction(),
+			backgroundAnswers.getArrestOrConvictionDetails(),
+			backgroundAnswers.getRefusedEntryOrDeported(),
+			backgroundAnswers.getRefusedEntryOrDeportedDetails(),
+			backgroundAnswers.getTraffickingOrDrugs(),
+			backgroundAnswers.getTraffickingOrDrugsDetails(),
+			backgroundAnswers.getCyberOrTerrorism(),
+			backgroundAnswers.getCyberOrTerrorismDetails(),
+			backgroundAnswers.getTerrorismViews(),
+			backgroundAnswers.getTerrorismViewsDetails(),
+			backgroundAnswers.getAsylum(),
+			backgroundAnswers.getAsylumDetails()
 		);
 	}
 

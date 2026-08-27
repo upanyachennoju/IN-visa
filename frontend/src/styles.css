@@ -29,7 +29,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -42,12 +43,17 @@ button {
 }
 
 input,
-select {
+select,
+textarea {
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 10px 12px;
   background: #fff;
   color: var(--text);
+}
+
+textarea {
+  resize: vertical;
 }
 
 input[type='checkbox'] {
