@@ -795,6 +795,70 @@ public class Application {
 
 		protected VisaTrip() {
 		}
+
+		public String getVisaType() {
+			return visaType;
+		}
+
+		public void setVisaType(String visaType) {
+			this.visaType = visaType;
+		}
+
+		public String getDuration() {
+			return duration;
+		}
+
+		public void setDuration(String duration) {
+			this.duration = duration;
+		}
+
+		public String getEntries() {
+			return entries;
+		}
+
+		public void setEntries(String entries) {
+			this.entries = entries;
+		}
+
+		public String getPurpose() {
+			return purpose;
+		}
+
+		public void setPurpose(String purpose) {
+			this.purpose = purpose;
+		}
+
+		public List<String> getPlacesToVisit() {
+			return placesToVisit;
+		}
+
+		public void setPlacesToVisit(List<String> placesToVisit) {
+			this.placesToVisit = placesToVisit;
+		}
+
+		public LocalDate getArrivalDate() {
+			return arrivalDate;
+		}
+
+		public void setArrivalDate(LocalDate arrivalDate) {
+			this.arrivalDate = arrivalDate;
+		}
+
+		public String getPortOfArrival() {
+			return portOfArrival;
+		}
+
+		public void setPortOfArrival(String portOfArrival) {
+			this.portOfArrival = portOfArrival;
+		}
+
+		public String getPortOfExit() {
+			return portOfExit;
+		}
+
+		public void setPortOfExit(String portOfExit) {
+			this.portOfExit = portOfExit;
+		}
 	}
 
 	@Embeddable
@@ -809,6 +873,46 @@ public class Application {
 
 		protected PreviousIndiaTravel() {
 		}
+
+		public Boolean getVisitedBefore() {
+			return visitedBefore;
+		}
+
+		public void setVisitedBefore(Boolean visitedBefore) {
+			this.visitedBefore = visitedBefore;
+		}
+
+		public String getPreviousVisa() {
+			return previousVisa;
+		}
+
+		public void setPreviousVisa(String previousVisa) {
+			this.previousVisa = previousVisa;
+		}
+
+		public String getPreviousVisaNumber() {
+			return previousVisaNumber;
+		}
+
+		public void setPreviousVisaNumber(String previousVisaNumber) {
+			this.previousVisaNumber = previousVisaNumber;
+		}
+
+		public String getPreviousAddress() {
+			return previousAddress;
+		}
+
+		public void setPreviousAddress(String previousAddress) {
+			this.previousAddress = previousAddress;
+		}
+
+		public List<String> getCitiesVisited() {
+			return citiesVisited;
+		}
+
+		public void setCitiesVisited(List<String> citiesVisited) {
+			this.citiesVisited = citiesVisited;
+		}
 	}
 
 	@Embeddable
@@ -820,6 +924,22 @@ public class Application {
 		private List<String> saarcTravel = new ArrayList<>();
 
 		protected TravelHistory() {
+		}
+
+		public List<String> getCountriesVisitedLast10Years() {
+			return countriesVisitedLast10Years;
+		}
+
+		public void setCountriesVisitedLast10Years(List<String> countriesVisitedLast10Years) {
+			this.countriesVisitedLast10Years = countriesVisitedLast10Years;
+		}
+
+		public List<String> getSaarcTravel() {
+			return saarcTravel;
+		}
+
+		public void setSaarcTravel(List<String> saarcTravel) {
+			this.saarcTravel = saarcTravel;
 		}
 	}
 
@@ -833,6 +953,22 @@ public class Application {
 
 		protected References() {
 		}
+
+		public IndiaRef getIndiaRef() {
+			return indiaRef;
+		}
+
+		public void setIndiaRef(IndiaRef indiaRef) {
+			this.indiaRef = indiaRef;
+		}
+
+		public HomeCountryRef getHomeCountryRef() {
+			return homeCountryRef;
+		}
+
+		public void setHomeCountryRef(HomeCountryRef homeCountryRef) {
+			this.homeCountryRef = homeCountryRef;
+		}
 	}
 
 	@Embeddable
@@ -845,6 +981,46 @@ public class Application {
 
 		protected IndiaRef() {
 		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public String getState() {
+			return state;
+		}
+
+		public void setState(String state) {
+			this.state = state;
+		}
+
+		public String getDistrict() {
+			return district;
+		}
+
+		public void setDistrict(String district) {
+			this.district = district;
+		}
+
+		public String getPhone() {
+			return phone;
+		}
+
+		public void setPhone(String phone) {
+			this.phone = phone;
+		}
 	}
 
 	@Embeddable
@@ -854,6 +1030,30 @@ public class Application {
 		private String phone;
 
 		protected HomeCountryRef() {
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public String getPhone() {
+			return phone;
+		}
+
+		public void setPhone(String phone) {
+			this.phone = phone;
 		}
 	}
 
@@ -948,6 +1148,38 @@ public class Application {
 
 	public void setOccupation(Occupation occupation) {
 		this.occupation = occupation;
+	}
+
+	public VisaTrip getVisaTrip() {
+		return visaTrip;
+	}
+
+	public void setVisaTrip(VisaTrip visaTrip) {
+		this.visaTrip = visaTrip;
+	}
+
+	public PreviousIndiaTravel getPreviousIndiaTravel() {
+		return previousIndiaTravel;
+	}
+
+	public void setPreviousIndiaTravel(PreviousIndiaTravel previousIndiaTravel) {
+		this.previousIndiaTravel = previousIndiaTravel;
+	}
+
+	public TravelHistory getTravelHistory() {
+		return travelHistory;
+	}
+
+	public void setTravelHistory(TravelHistory travelHistory) {
+		this.travelHistory = travelHistory;
+	}
+
+	public References getReferences() {
+		return references;
+	}
+
+	public void setReferences(References references) {
+		this.references = references;
 	}
 
 	public Contact getContact() {

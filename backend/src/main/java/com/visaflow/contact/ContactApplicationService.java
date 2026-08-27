@@ -136,6 +136,18 @@ public class ContactApplicationService {
 		if (application.getOccupation() != null) {
 			sections.add("OCCUPATION");
 		}
+		if (application.getVisaTrip() != null) {
+			sections.add("VISA_TRIP");
+		}
+		if (application.getPreviousIndiaTravel() != null) {
+			sections.add("PREVIOUS_INDIA_TRAVEL");
+		}
+		if (application.getTravelHistory() != null) {
+			sections.add("TRAVEL_HISTORY");
+		}
+		if (application.getReferences() != null) {
+			sections.add("REFERENCES");
+		}
 		if (application.getContact() != null && application.getContact().isEmailVerified() && application.getContact().isPhoneVerified()) {
 			sections.add("CONTACT");
 		}

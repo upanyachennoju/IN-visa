@@ -91,3 +91,56 @@ record OccupationRequest(
 	String militaryBackground
 ) {
 }
+
+record VisaTripRequest(
+	String tempId,
+	String visaType,
+	String duration,
+	String entries,
+	String purpose,
+	List<String> placesToVisit,
+	LocalDate arrivalDate,
+	String portOfArrival,
+	String portOfExit
+) {
+}
+
+record PreviousIndiaTravelRequest(
+	String tempId,
+	Boolean visitedBefore,
+	String previousVisa,
+	String previousVisaNumber,
+	String previousAddress,
+	List<String> citiesVisited
+) {
+}
+
+record TravelHistoryRequest(
+	String tempId,
+	List<String> countriesVisitedLast10Years,
+	List<String> saarcTravel
+) {
+}
+
+record ReferencesRequest(
+	String tempId,
+	IndiaRefRequest indiaRef,
+	HomeCountryRefRequest homeCountryRef
+) {
+}
+
+record IndiaRefRequest(
+	String name,
+	String address,
+	String state,
+	String district,
+	String phone
+) {
+}
+
+record HomeCountryRefRequest(
+	String name,
+	String address,
+	String phone
+) {
+}

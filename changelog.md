@@ -23,3 +23,7 @@
 ## 2026-08-27
 - Step 5: Added save-and-continue form UIs and backend save endpoints for Address, Family, and Occupation, including the Address same-as-present mirroring behavior inside the form shell.
 - Files touched: `backend/src/main/java/com/visaflow/application/Application.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionController.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionDtos.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionService.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateDtos.java`, `backend/src/main/java/com/visaflow/contact/ContactApplicationService.java`, `frontend/src/App.jsx`, `frontend/src/styles.css`
+
+## 2026-08-27
+- Step 6: Added save-and-continue form UIs and backend save endpoints for Visa / Trip, Previous India Travel, Travel History, and References, including nested reference blocks and comma-separated list inputs for multi-value fields.
+- Files touched: `backend/src/main/java/com/visaflow/application/Application.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionController.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionDtos.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionService.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateDtos.java`, `backend/src/main/java/com/visaflow/contact/ContactApplicationService.java`, `frontend/src/App.jsx`

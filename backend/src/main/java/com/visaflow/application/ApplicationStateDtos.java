@@ -15,6 +15,10 @@ record ApplicationStateResponse(
 	AddressState address,
 	FamilyState family,
 	OccupationState occupation,
+	VisaTripState visaTrip,
+	PreviousIndiaTravelState previousIndiaTravel,
+	TravelHistoryState travelHistory,
+	ReferencesState references,
 	ContactState contact
 ) {
 }
@@ -102,6 +106,55 @@ record OccupationState(
 	String employerPhone,
 	String previous,
 	String militaryBackground
+) {
+}
+
+record VisaTripState(
+	String visaType,
+	String duration,
+	String entries,
+	String purpose,
+	List<String> placesToVisit,
+	LocalDate arrivalDate,
+	String portOfArrival,
+	String portOfExit
+) {
+}
+
+record PreviousIndiaTravelState(
+	Boolean visitedBefore,
+	String previousVisa,
+	String previousVisaNumber,
+	String previousAddress,
+	List<String> citiesVisited
+) {
+}
+
+record TravelHistoryState(
+	List<String> countriesVisitedLast10Years,
+	List<String> saarcTravel
+) {
+}
+
+record ReferencesState(
+	IndiaRefState indiaRef,
+	HomeCountryRefState homeCountryRef
+) {
+}
+
+record IndiaRefState(
+	String name,
+	String address,
+	String state,
+	String district,
+	String phone
+) {
+}
+
+record HomeCountryRefState(
+	String name,
+	String address,
+	String phone
 ) {
 }
 

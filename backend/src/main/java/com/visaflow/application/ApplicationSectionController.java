@@ -47,4 +47,24 @@ public class ApplicationSectionController {
 	public ApplicationStateResponse saveOccupation(@PathVariable String tempId, @RequestBody OccupationRequest request) {
 		return service.saveOccupation(tempId, request);
 	}
+
+	@PostMapping("/{tempId}/visa-trip")
+	public ApplicationStateResponse saveVisaTrip(@PathVariable String tempId, @RequestBody VisaTripRequest request) {
+		return service.saveVisaTrip(tempId, request);
+	}
+
+	@PostMapping("/{tempId}/previous-india-travel")
+	public ApplicationStateResponse savePreviousIndiaTravel(@PathVariable String tempId, @RequestBody PreviousIndiaTravelRequest request) {
+		return service.savePreviousIndiaTravel(tempId, request);
+	}
+
+	@PostMapping("/{tempId}/travel-history")
+	public ApplicationStateResponse saveTravelHistory(@PathVariable String tempId, @RequestBody TravelHistoryRequest request) {
+		return service.saveTravelHistory(tempId, request);
+	}
+
+	@PostMapping("/{tempId}/references")
+	public ApplicationStateResponse saveReferences(@PathVariable String tempId, @RequestBody ReferencesRequest request) {
+		return service.saveReferences(tempId, request);
+	}
 }

@@ -12,3 +12,4 @@
 - Created the draft on Application Context save and returned both `applicationId` and `tempId` — the shell can resume by `tempId` while still using the older Contact OTP endpoints by numeric id.
 - Used a synthetic passport pattern of `VF-XXXXXX` — it is obviously fake and avoids validating any real-world passport scheme.
 - Mirrored present address into permanent address when "same as present" is checked — that keeps the Address section simple while still sending a complete payload to the backend.
+- Used comma-separated text inputs for list-backed trip/history fields — it keeps the prototype compact while still serializing cleanly to backend lists.

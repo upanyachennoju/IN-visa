@@ -36,6 +36,13 @@ const EMPTY_APPLICATION = {
   identity: null,
   passport: null,
   contact: null,
+  address: null,
+  family: null,
+  occupation: null,
+  visaTrip: null,
+  previousIndiaTravel: null,
+  travelHistory: null,
+  references: null,
 };
 
 const EMPTY_CONTEXT_FORM = {
@@ -125,6 +132,41 @@ const EMPTY_OCCUPATION_FORM = {
   militaryBackground: '',
 };
 
+const EMPTY_VISA_TRIP_FORM = {
+  visaType: '',
+  duration: '',
+  entries: '',
+  purpose: '',
+  placesToVisit: '',
+  arrivalDate: '',
+  portOfArrival: '',
+  portOfExit: '',
+};
+
+const EMPTY_PREVIOUS_INDIA_TRAVEL_FORM = {
+  visitedBefore: '',
+  previousVisa: '',
+  previousVisaNumber: '',
+  previousAddress: '',
+  citiesVisited: '',
+};
+
+const EMPTY_TRAVEL_HISTORY_FORM = {
+  countriesVisitedLast10Years: '',
+  saarcTravel: '',
+};
+
+const EMPTY_REFERENCES_FORM = {
+  indiaRefName: '',
+  indiaRefAddress: '',
+  indiaRefState: '',
+  indiaRefDistrict: '',
+  indiaRefPhone: '',
+  homeCountryRefName: '',
+  homeCountryRefAddress: '',
+  homeCountryRefPhone: '',
+};
+
 function parseRoute() {
   const hash = window.location.hash.replace(/^#\/?/, '');
   if (hash.startsWith('resume')) {
@@ -149,6 +191,10 @@ function normalizeResponse(data) {
     address: data.address || null,
     family: data.family || null,
     occupation: data.occupation || null,
+    visaTrip: data.visaTrip || null,
+    previousIndiaTravel: data.previousIndiaTravel || null,
+    travelHistory: data.travelHistory || null,
+    references: data.references || null,
     contact: data.contact || null,
   };
 }
@@ -267,6 +313,60 @@ function buildOccupationForm(application) {
   };
 }
 
+function buildVisaTripForm(application) {
+  const visaTrip = application.visaTrip || {};
+  return {
+    visaType: visaTrip.visaType || '',
+    duration: visaTrip.duration || '',
+    entries: visaTrip.entries || '',
+    purpose: visaTrip.purpose || '',
+    placesToVisit: Array.isArray(visaTrip.placesToVisit) ? visaTrip.placesToVisit.join(', ') : '',
+    arrivalDate: visaTrip.arrivalDate || '',
+    portOfArrival: visaTrip.portOfArrival || '',
+    portOfExit: visaTrip.portOfExit || '',
+  };
+}
+
+function buildPreviousIndiaTravelForm(application) {
+  const previousIndiaTravel = application.previousIndiaTravel || {};
+  return {
+    visitedBefore:
+      previousIndiaTravel.visitedBefore === null || previousIndiaTravel.visitedBefore === undefined
+        ? ''
+        : String(Boolean(previousIndiaTravel.visitedBefore)),
+    previousVisa: previousIndiaTravel.previousVisa || '',
+    previousVisaNumber: previousIndiaTravel.previousVisaNumber || '',
+    previousAddress: previousIndiaTravel.previousAddress || '',
+    citiesVisited: Array.isArray(previousIndiaTravel.citiesVisited) ? previousIndiaTravel.citiesVisited.join(', ') : '',
+  };
+}
+
+function buildTravelHistoryForm(application) {
+  const travelHistory = application.travelHistory || {};
+  return {
+    countriesVisitedLast10Years: Array.isArray(travelHistory.countriesVisitedLast10Years)
+      ? travelHistory.countriesVisitedLast10Years.join(', ')
+      : '',
+    saarcTravel: Array.isArray(travelHistory.saarcTravel) ? travelHistory.saarcTravel.join(', ') : '',
+  };
+}
+
+function buildReferencesForm(application) {
+  const references = application.references || {};
+  const indiaRef = references.indiaRef || {};
+  const homeCountryRef = references.homeCountryRef || {};
+  return {
+    indiaRefName: indiaRef.name || '',
+    indiaRefAddress: indiaRef.address || '',
+    indiaRefState: indiaRef.state || '',
+    indiaRefDistrict: indiaRef.district || '',
+    indiaRefPhone: indiaRef.phone || '',
+    homeCountryRefName: homeCountryRef.name || '',
+    homeCountryRefAddress: homeCountryRef.address || '',
+    homeCountryRefPhone: homeCountryRef.phone || '',
+  };
+}
+
 function validateContextForm(form) {
   const errors = {};
   if (!form.countryApplyingFrom.trim()) errors.countryApplyingFrom = 'Required.';
@@ -363,6 +463,58 @@ function validateOccupationForm(form) {
   return errors;
 }
 
+function validateVisaTripForm(form) {
+  const errors = {};
+  if (!form.visaType.trim()) errors.visaType = 'Required.';
+  if (!form.duration.trim()) errors.duration = 'Required.';
+  if (!form.entries.trim()) errors.entries = 'Required.';
+  if (!form.purpose.trim()) errors.purpose = 'Required.';
+  if (!form.placesToVisit.trim()) errors.placesToVisit = 'Required.';
+  if (!DATE_RE.test(form.arrivalDate)) errors.arrivalDate = 'Use YYYY-MM-DD.';
+  if (!form.portOfArrival.trim()) errors.portOfArrival = 'Required.';
+  if (!form.portOfExit.trim()) errors.portOfExit = 'Required.';
+  return errors;
+}
+
+function validatePreviousIndiaTravelForm(form) {
+  const errors = {};
+  if (form.visitedBefore === '') errors.visitedBefore = 'Required.';
+  if (form.visitedBefore === 'true') {
+    if (!form.previousVisa.trim()) errors.previousVisa = 'Required.';
+    if (!form.previousVisaNumber.trim()) errors.previousVisaNumber = 'Required.';
+    if (!form.previousAddress.trim()) errors.previousAddress = 'Required.';
+    if (!form.citiesVisited.trim()) errors.citiesVisited = 'Required.';
+  }
+  return errors;
+}
+
+function validateTravelHistoryForm(form) {
+  const errors = {};
+  if (!form.countriesVisitedLast10Years.trim()) errors.countriesVisitedLast10Years = 'Required.';
+  if (!form.saarcTravel.trim()) errors.saarcTravel = 'Required.';
+  return errors;
+}
+
+function validateReferencesForm(form) {
+  const errors = {};
+  if (!form.indiaRefName.trim()) errors.indiaRefName = 'Required.';
+  if (!form.indiaRefAddress.trim()) errors.indiaRefAddress = 'Required.';
+  if (!form.indiaRefState.trim()) errors.indiaRefState = 'Required.';
+  if (!form.indiaRefDistrict.trim()) errors.indiaRefDistrict = 'Required.';
+  if (!form.indiaRefPhone.trim()) errors.indiaRefPhone = 'Required.';
+  if (!form.homeCountryRefName.trim()) errors.homeCountryRefName = 'Required.';
+  if (!form.homeCountryRefAddress.trim()) errors.homeCountryRefAddress = 'Required.';
+  if (!form.homeCountryRefPhone.trim()) errors.homeCountryRefPhone = 'Required.';
+  return errors;
+}
+
+function splitCsvList(value) {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function sectionLabel(key) {
   return SECTION_STEPS.find((step) => step.key === key)?.label || 'Section';
 }
@@ -383,6 +535,10 @@ export default function App() {
   const [addressForm, setAddressForm] = useState(EMPTY_ADDRESS_FORM);
   const [familyForm, setFamilyForm] = useState(EMPTY_FAMILY_FORM);
   const [occupationForm, setOccupationForm] = useState(EMPTY_OCCUPATION_FORM);
+  const [visaTripForm, setVisaTripForm] = useState(EMPTY_VISA_TRIP_FORM);
+  const [previousIndiaTravelForm, setPreviousIndiaTravelForm] = useState(EMPTY_PREVIOUS_INDIA_TRAVEL_FORM);
+  const [travelHistoryForm, setTravelHistoryForm] = useState(EMPTY_TRAVEL_HISTORY_FORM);
+  const [referencesForm, setReferencesForm] = useState(EMPTY_REFERENCES_FORM);
   const [emailOtp, setEmailOtp] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
   const [fieldErrors, setFieldErrors] = useState({
@@ -392,6 +548,10 @@ export default function App() {
     ADDRESS: {},
     FAMILY: {},
     OCCUPATION: {},
+    VISA_TRIP: {},
+    PREVIOUS_INDIA_TRAVEL: {},
+    TRAVEL_HISTORY: {},
+    REFERENCES: {},
     CONTACT: {},
   });
   const [simulatedOtps, setSimulatedOtps] = useState({ email: '', phone: '' });
@@ -426,6 +586,10 @@ export default function App() {
           setAddressForm(buildAddressForm(nextApplication));
           setFamilyForm(buildFamilyForm(nextApplication));
           setOccupationForm(buildOccupationForm(nextApplication));
+          setVisaTripForm(buildVisaTripForm(nextApplication));
+          setPreviousIndiaTravelForm(buildPreviousIndiaTravelForm(nextApplication));
+          setTravelHistoryForm(buildTravelHistoryForm(nextApplication));
+          setReferencesForm(buildReferencesForm(nextApplication));
           setContactForm(buildContactForm(nextApplication));
           setEmailOtp('');
           setPhoneOtp('');
@@ -444,6 +608,10 @@ export default function App() {
       setAddressForm(EMPTY_ADDRESS_FORM);
       setFamilyForm(EMPTY_FAMILY_FORM);
       setOccupationForm(EMPTY_OCCUPATION_FORM);
+      setVisaTripForm(EMPTY_VISA_TRIP_FORM);
+      setPreviousIndiaTravelForm(EMPTY_PREVIOUS_INDIA_TRAVEL_FORM);
+      setTravelHistoryForm(EMPTY_TRAVEL_HISTORY_FORM);
+      setReferencesForm(EMPTY_REFERENCES_FORM);
       setContactForm(EMPTY_CONTACT_FORM);
       setEmailOtp('');
       setPhoneOtp('');
@@ -454,6 +622,10 @@ export default function App() {
         ADDRESS: {},
         FAMILY: {},
         OCCUPATION: {},
+        VISA_TRIP: {},
+        PREVIOUS_INDIA_TRAVEL: {},
+        TRAVEL_HISTORY: {},
+        REFERENCES: {},
         CONTACT: {},
       });
       setVerificationResult(null);
@@ -695,6 +867,155 @@ export default function App() {
       setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
     } catch {
       setError('Occupation save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveVisaTrip(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateVisaTripForm(visaTripForm);
+    setFieldErrors((current) => ({ ...current, VISA_TRIP: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/visa-trip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          ...visaTripForm,
+          placesToVisit: splitCsvList(visaTripForm.placesToVisit),
+        }),
+      });
+      if (!response.ok) {
+        setError('Visa Trip save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setVisaTripForm(buildVisaTripForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Visa Trip save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function savePreviousIndiaTravel(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validatePreviousIndiaTravelForm(previousIndiaTravelForm);
+    setFieldErrors((current) => ({ ...current, PREVIOUS_INDIA_TRAVEL: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/previous-india-travel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          visitedBefore: previousIndiaTravelForm.visitedBefore === 'true',
+          previousVisa: previousIndiaTravelForm.previousVisa,
+          previousVisaNumber: previousIndiaTravelForm.previousVisaNumber,
+          previousAddress: previousIndiaTravelForm.previousAddress,
+          citiesVisited: splitCsvList(previousIndiaTravelForm.citiesVisited),
+        }),
+      });
+      if (!response.ok) {
+        setError('Previous India Travel save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setPreviousIndiaTravelForm(buildPreviousIndiaTravelForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Previous India Travel save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveTravelHistory(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateTravelHistoryForm(travelHistoryForm);
+    setFieldErrors((current) => ({ ...current, TRAVEL_HISTORY: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/travel-history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          countriesVisitedLast10Years: splitCsvList(travelHistoryForm.countriesVisitedLast10Years),
+          saarcTravel: splitCsvList(travelHistoryForm.saarcTravel),
+        }),
+      });
+      if (!response.ok) {
+        setError('Travel History save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setTravelHistoryForm(buildTravelHistoryForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Travel History save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveReferences(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateReferencesForm(referencesForm);
+    setFieldErrors((current) => ({ ...current, REFERENCES: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/references`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          indiaRef: {
+            name: referencesForm.indiaRefName,
+            address: referencesForm.indiaRefAddress,
+            state: referencesForm.indiaRefState,
+            district: referencesForm.indiaRefDistrict,
+            phone: referencesForm.indiaRefPhone,
+          },
+          homeCountryRef: {
+            name: referencesForm.homeCountryRefName,
+            address: referencesForm.homeCountryRefAddress,
+            phone: referencesForm.homeCountryRefPhone,
+          },
+        }),
+      });
+      if (!response.ok) {
+        setError('References save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setReferencesForm(buildReferencesForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('References save failed. Make sure the backend is running on port 8080.');
     }
   }
 
@@ -1481,6 +1802,179 @@ export default function App() {
                       type="text"
                     />
                     {fieldErrors.OCCUPATION.militaryBackground ? <span className="field-error">{fieldErrors.OCCUPATION.militaryBackground}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'VISA_TRIP' ? (
+              <section className="section-card">
+                <h2>Visa / Trip</h2>
+                <form className="form-grid" onSubmit={saveVisaTrip}>
+                  <label>
+                    Visa type
+                    <input value={visaTripForm.visaType} onChange={(event) => setVisaTripForm({ ...visaTripForm, visaType: event.target.value })} type="text" />
+                    {fieldErrors.VISA_TRIP.visaType ? <span className="field-error">{fieldErrors.VISA_TRIP.visaType}</span> : null}
+                  </label>
+                  <label>
+                    Duration
+                    <input value={visaTripForm.duration} onChange={(event) => setVisaTripForm({ ...visaTripForm, duration: event.target.value })} type="text" />
+                    {fieldErrors.VISA_TRIP.duration ? <span className="field-error">{fieldErrors.VISA_TRIP.duration}</span> : null}
+                  </label>
+                  <label>
+                    Entries
+                    <input value={visaTripForm.entries} onChange={(event) => setVisaTripForm({ ...visaTripForm, entries: event.target.value })} type="text" />
+                    {fieldErrors.VISA_TRIP.entries ? <span className="field-error">{fieldErrors.VISA_TRIP.entries}</span> : null}
+                  </label>
+                  <label>
+                    Purpose
+                    <input value={visaTripForm.purpose} onChange={(event) => setVisaTripForm({ ...visaTripForm, purpose: event.target.value })} type="text" />
+                    {fieldErrors.VISA_TRIP.purpose ? <span className="field-error">{fieldErrors.VISA_TRIP.purpose}</span> : null}
+                  </label>
+                  <label>
+                    Places to visit
+                    <input
+                      value={visaTripForm.placesToVisit}
+                      onChange={(event) => setVisaTripForm({ ...visaTripForm, placesToVisit: event.target.value })}
+                      type="text"
+                      placeholder="Comma-separated entries"
+                    />
+                    {fieldErrors.VISA_TRIP.placesToVisit ? <span className="field-error">{fieldErrors.VISA_TRIP.placesToVisit}</span> : null}
+                  </label>
+                  <label>
+                    Arrival date
+                    <input value={visaTripForm.arrivalDate} onChange={(event) => setVisaTripForm({ ...visaTripForm, arrivalDate: event.target.value })} type="text" placeholder="YYYY-MM-DD" />
+                    {fieldErrors.VISA_TRIP.arrivalDate ? <span className="field-error">{fieldErrors.VISA_TRIP.arrivalDate}</span> : null}
+                  </label>
+                  <label>
+                    Port of arrival
+                    <input value={visaTripForm.portOfArrival} onChange={(event) => setVisaTripForm({ ...visaTripForm, portOfArrival: event.target.value })} type="text" />
+                    {fieldErrors.VISA_TRIP.portOfArrival ? <span className="field-error">{fieldErrors.VISA_TRIP.portOfArrival}</span> : null}
+                  </label>
+                  <label>
+                    Port of exit
+                    <input value={visaTripForm.portOfExit} onChange={(event) => setVisaTripForm({ ...visaTripForm, portOfExit: event.target.value })} type="text" />
+                    {fieldErrors.VISA_TRIP.portOfExit ? <span className="field-error">{fieldErrors.VISA_TRIP.portOfExit}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'PREVIOUS_INDIA_TRAVEL' ? (
+              <section className="section-card">
+                <h2>Previous India Travel</h2>
+                <form className="form-grid" onSubmit={savePreviousIndiaTravel}>
+                  <label>
+                    Visited before
+                    <select value={previousIndiaTravelForm.visitedBefore} onChange={(event) => setPreviousIndiaTravelForm({ ...previousIndiaTravelForm, visitedBefore: event.target.value })}>
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.PREVIOUS_INDIA_TRAVEL.visitedBefore ? <span className="field-error">{fieldErrors.PREVIOUS_INDIA_TRAVEL.visitedBefore}</span> : null}
+                  </label>
+                  <label>
+                    Previous visa
+                    <input value={previousIndiaTravelForm.previousVisa} onChange={(event) => setPreviousIndiaTravelForm({ ...previousIndiaTravelForm, previousVisa: event.target.value })} type="text" />
+                    {fieldErrors.PREVIOUS_INDIA_TRAVEL.previousVisa ? <span className="field-error">{fieldErrors.PREVIOUS_INDIA_TRAVEL.previousVisa}</span> : null}
+                  </label>
+                  <label>
+                    Previous visa number
+                    <input value={previousIndiaTravelForm.previousVisaNumber} onChange={(event) => setPreviousIndiaTravelForm({ ...previousIndiaTravelForm, previousVisaNumber: event.target.value })} type="text" />
+                    {fieldErrors.PREVIOUS_INDIA_TRAVEL.previousVisaNumber ? <span className="field-error">{fieldErrors.PREVIOUS_INDIA_TRAVEL.previousVisaNumber}</span> : null}
+                  </label>
+                  <label>
+                    Previous address
+                    <input value={previousIndiaTravelForm.previousAddress} onChange={(event) => setPreviousIndiaTravelForm({ ...previousIndiaTravelForm, previousAddress: event.target.value })} type="text" />
+                    {fieldErrors.PREVIOUS_INDIA_TRAVEL.previousAddress ? <span className="field-error">{fieldErrors.PREVIOUS_INDIA_TRAVEL.previousAddress}</span> : null}
+                  </label>
+                  <label>
+                    Cities visited
+                    <input
+                      value={previousIndiaTravelForm.citiesVisited}
+                      onChange={(event) => setPreviousIndiaTravelForm({ ...previousIndiaTravelForm, citiesVisited: event.target.value })}
+                      type="text"
+                      placeholder="Comma-separated entries"
+                    />
+                    {fieldErrors.PREVIOUS_INDIA_TRAVEL.citiesVisited ? <span className="field-error">{fieldErrors.PREVIOUS_INDIA_TRAVEL.citiesVisited}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'TRAVEL_HISTORY' ? (
+              <section className="section-card">
+                <h2>Travel History</h2>
+                <form className="form-grid" onSubmit={saveTravelHistory}>
+                  <label>
+                    Countries visited in last 10 years
+                    <input
+                      value={travelHistoryForm.countriesVisitedLast10Years}
+                      onChange={(event) => setTravelHistoryForm({ ...travelHistoryForm, countriesVisitedLast10Years: event.target.value })}
+                      type="text"
+                      placeholder="Comma-separated entries"
+                    />
+                    {fieldErrors.TRAVEL_HISTORY.countriesVisitedLast10Years ? <span className="field-error">{fieldErrors.TRAVEL_HISTORY.countriesVisitedLast10Years}</span> : null}
+                  </label>
+                  <label>
+                    SAARC travel
+                    <input
+                      value={travelHistoryForm.saarcTravel}
+                      onChange={(event) => setTravelHistoryForm({ ...travelHistoryForm, saarcTravel: event.target.value })}
+                      type="text"
+                      placeholder="Comma-separated entries"
+                    />
+                    {fieldErrors.TRAVEL_HISTORY.saarcTravel ? <span className="field-error">{fieldErrors.TRAVEL_HISTORY.saarcTravel}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'REFERENCES' ? (
+              <section className="section-card">
+                <h2>References</h2>
+                <form className="form-grid" onSubmit={saveReferences}>
+                  <div>
+                    <h3>India reference</h3>
+                  </div>
+                  <label>
+                    Name
+                    <input value={referencesForm.indiaRefName} onChange={(event) => setReferencesForm({ ...referencesForm, indiaRefName: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.indiaRefName ? <span className="field-error">{fieldErrors.REFERENCES.indiaRefName}</span> : null}
+                  </label>
+                  <label>
+                    Address
+                    <input value={referencesForm.indiaRefAddress} onChange={(event) => setReferencesForm({ ...referencesForm, indiaRefAddress: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.indiaRefAddress ? <span className="field-error">{fieldErrors.REFERENCES.indiaRefAddress}</span> : null}
+                  </label>
+                  <label>
+                    State
+                    <input value={referencesForm.indiaRefState} onChange={(event) => setReferencesForm({ ...referencesForm, indiaRefState: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.indiaRefState ? <span className="field-error">{fieldErrors.REFERENCES.indiaRefState}</span> : null}
+                  </label>
+                  <label>
+                    District
+                    <input value={referencesForm.indiaRefDistrict} onChange={(event) => setReferencesForm({ ...referencesForm, indiaRefDistrict: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.indiaRefDistrict ? <span className="field-error">{fieldErrors.REFERENCES.indiaRefDistrict}</span> : null}
+                  </label>
+                  <label>
+                    Phone
+                    <input value={referencesForm.indiaRefPhone} onChange={(event) => setReferencesForm({ ...referencesForm, indiaRefPhone: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.indiaRefPhone ? <span className="field-error">{fieldErrors.REFERENCES.indiaRefPhone}</span> : null}
+                  </label>
+                  <div>
+                    <h3>Home-country reference</h3>
+                  </div>
+                  <label>
+                    Name
+                    <input value={referencesForm.homeCountryRefName} onChange={(event) => setReferencesForm({ ...referencesForm, homeCountryRefName: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.homeCountryRefName ? <span className="field-error">{fieldErrors.REFERENCES.homeCountryRefName}</span> : null}
+                  </label>
+                  <label>
+                    Address
+                    <input value={referencesForm.homeCountryRefAddress} onChange={(event) => setReferencesForm({ ...referencesForm, homeCountryRefAddress: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.homeCountryRefAddress ? <span className="field-error">{fieldErrors.REFERENCES.homeCountryRefAddress}</span> : null}
+                  </label>
+                  <label>
+                    Phone
+                    <input value={referencesForm.homeCountryRefPhone} onChange={(event) => setReferencesForm({ ...referencesForm, homeCountryRefPhone: event.target.value })} type="text" />
+                    {fieldErrors.REFERENCES.homeCountryRefPhone ? <span className="field-error">{fieldErrors.REFERENCES.homeCountryRefPhone}</span> : null}
                   </label>
                   <button type="submit">Save and continue</button>
                 </form>

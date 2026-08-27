@@ -234,7 +234,117 @@ public class ApplicationSectionService {
 		occupation.setMilitaryBackground(request.militaryBackground());
 
 		application.setOccupation(occupation);
-		application.setCurrentSection("CONTACT");
+		application.setCurrentSection("VISA_TRIP");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
+	public ApplicationStateResponse saveVisaTrip(String tempId, VisaTripRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.visaType(), "visaType");
+		validateRequired(request.duration(), "duration");
+		validateRequired(request.entries(), "entries");
+		validateRequired(request.purpose(), "purpose");
+		validateRequired(request.placesToVisit(), "placesToVisit");
+		validateRequired(request.arrivalDate(), "arrivalDate");
+		validateRequired(request.portOfArrival(), "portOfArrival");
+		validateRequired(request.portOfExit(), "portOfExit");
+
+		Application.VisaTrip visaTrip = new Application.VisaTrip();
+		visaTrip.setVisaType(request.visaType());
+		visaTrip.setDuration(request.duration());
+		visaTrip.setEntries(request.entries());
+		visaTrip.setPurpose(request.purpose());
+		visaTrip.setPlacesToVisit(new ArrayList<>(request.placesToVisit()));
+		visaTrip.setArrivalDate(request.arrivalDate());
+		visaTrip.setPortOfArrival(request.portOfArrival());
+		visaTrip.setPortOfExit(request.portOfExit());
+
+		application.setVisaTrip(visaTrip);
+		application.setCurrentSection("PREVIOUS_INDIA_TRAVEL");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
+	public ApplicationStateResponse savePreviousIndiaTravel(String tempId, PreviousIndiaTravelRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.visitedBefore(), "visitedBefore");
+
+		boolean visitedBefore = Boolean.TRUE.equals(request.visitedBefore());
+		if (visitedBefore) {
+			validateRequired(request.previousVisa(), "previousVisa");
+			validateRequired(request.previousVisaNumber(), "previousVisaNumber");
+			validateRequired(request.previousAddress(), "previousAddress");
+			validateRequired(request.citiesVisited(), "citiesVisited");
+		}
+
+		Application.PreviousIndiaTravel previousIndiaTravel = new Application.PreviousIndiaTravel();
+		previousIndiaTravel.setVisitedBefore(request.visitedBefore());
+		previousIndiaTravel.setPreviousVisa(request.previousVisa());
+		previousIndiaTravel.setPreviousVisaNumber(request.previousVisaNumber());
+		previousIndiaTravel.setPreviousAddress(request.previousAddress());
+		previousIndiaTravel.setCitiesVisited(request.citiesVisited() == null ? null : new ArrayList<>(request.citiesVisited()));
+
+		application.setPreviousIndiaTravel(previousIndiaTravel);
+		application.setCurrentSection("TRAVEL_HISTORY");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
+	public ApplicationStateResponse saveTravelHistory(String tempId, TravelHistoryRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.countriesVisitedLast10Years(), "countriesVisitedLast10Years");
+		validateRequired(request.saarcTravel(), "saarcTravel");
+
+		Application.TravelHistory travelHistory = new Application.TravelHistory();
+		travelHistory.setCountriesVisitedLast10Years(new ArrayList<>(request.countriesVisitedLast10Years()));
+		travelHistory.setSaarcTravel(new ArrayList<>(request.saarcTravel()));
+
+		application.setTravelHistory(travelHistory);
+		application.setCurrentSection("REFERENCES");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
+	public ApplicationStateResponse saveReferences(String tempId, ReferencesRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.indiaRef(), "indiaRef");
+		validateRequired(request.homeCountryRef(), "homeCountryRef");
+		validateRequired(request.indiaRef().name(), "indiaRef.name");
+		validateRequired(request.indiaRef().address(), "indiaRef.address");
+		validateRequired(request.indiaRef().state(), "indiaRef.state");
+		validateRequired(request.indiaRef().district(), "indiaRef.district");
+		validateRequired(request.indiaRef().phone(), "indiaRef.phone");
+		validateRequired(request.homeCountryRef().name(), "homeCountryRef.name");
+		validateRequired(request.homeCountryRef().address(), "homeCountryRef.address");
+		validateRequired(request.homeCountryRef().phone(), "homeCountryRef.phone");
+
+		Application.IndiaRef indiaRef = new Application.IndiaRef();
+		indiaRef.setName(request.indiaRef().name());
+		indiaRef.setAddress(request.indiaRef().address());
+		indiaRef.setState(request.indiaRef().state());
+		indiaRef.setDistrict(request.indiaRef().district());
+		indiaRef.setPhone(request.indiaRef().phone());
+
+		Application.HomeCountryRef homeCountryRef = new Application.HomeCountryRef();
+		homeCountryRef.setName(request.homeCountryRef().name());
+		homeCountryRef.setAddress(request.homeCountryRef().address());
+		homeCountryRef.setPhone(request.homeCountryRef().phone());
+
+		Application.References references = new Application.References();
+		references.setIndiaRef(indiaRef);
+		references.setHomeCountryRef(homeCountryRef);
+
+		application.setReferences(references);
+		application.setCurrentSection("BACKGROUND_ANSWERS");
 		application.markDraft();
 		application.setLastUpdatedAt(LocalDateTime.now());
 		repository.save(application);
@@ -280,6 +390,10 @@ public class ApplicationSectionService {
 			toAddress(application.getAddress()),
 			toFamily(application.getFamily()),
 			toOccupation(application.getOccupation()),
+			toVisaTrip(application.getVisaTrip()),
+			toPreviousIndiaTravel(application.getPreviousIndiaTravel()),
+			toTravelHistory(application.getTravelHistory()),
+			toReferences(application.getReferences()),
 			toContact(application.getContact())
 		);
 	}
@@ -303,6 +417,18 @@ public class ApplicationSectionService {
 		}
 		if (application.getOccupation() != null) {
 			sections.add("OCCUPATION");
+		}
+		if (application.getVisaTrip() != null) {
+			sections.add("VISA_TRIP");
+		}
+		if (application.getPreviousIndiaTravel() != null) {
+			sections.add("PREVIOUS_INDIA_TRAVEL");
+		}
+		if (application.getTravelHistory() != null) {
+			sections.add("TRAVEL_HISTORY");
+		}
+		if (application.getReferences() != null) {
+			sections.add("REFERENCES");
 		}
 		if (application.getContact() != null && application.getContact().isEmailVerified() && application.getContact().isPhoneVerified()) {
 			sections.add("CONTACT");
@@ -422,6 +548,79 @@ public class ApplicationSectionService {
 			occupation.getEmployerPhone(),
 			occupation.getPrevious(),
 			occupation.getMilitaryBackground()
+		);
+	}
+
+	private static VisaTripState toVisaTrip(Application.VisaTrip visaTrip) {
+		if (visaTrip == null) {
+			return null;
+		}
+		return new VisaTripState(
+			visaTrip.getVisaType(),
+			visaTrip.getDuration(),
+			visaTrip.getEntries(),
+			visaTrip.getPurpose(),
+			visaTrip.getPlacesToVisit(),
+			visaTrip.getArrivalDate(),
+			visaTrip.getPortOfArrival(),
+			visaTrip.getPortOfExit()
+		);
+	}
+
+	private static PreviousIndiaTravelState toPreviousIndiaTravel(Application.PreviousIndiaTravel previousIndiaTravel) {
+		if (previousIndiaTravel == null) {
+			return null;
+		}
+		return new PreviousIndiaTravelState(
+			previousIndiaTravel.getVisitedBefore(),
+			previousIndiaTravel.getPreviousVisa(),
+			previousIndiaTravel.getPreviousVisaNumber(),
+			previousIndiaTravel.getPreviousAddress(),
+			previousIndiaTravel.getCitiesVisited()
+		);
+	}
+
+	private static TravelHistoryState toTravelHistory(Application.TravelHistory travelHistory) {
+		if (travelHistory == null) {
+			return null;
+		}
+		return new TravelHistoryState(
+			travelHistory.getCountriesVisitedLast10Years(),
+			travelHistory.getSaarcTravel()
+		);
+	}
+
+	private static ReferencesState toReferences(Application.References references) {
+		if (references == null) {
+			return null;
+		}
+		return new ReferencesState(
+			toIndiaRef(references.getIndiaRef()),
+			toHomeCountryRef(references.getHomeCountryRef())
+		);
+	}
+
+	private static IndiaRefState toIndiaRef(Application.IndiaRef indiaRef) {
+		if (indiaRef == null) {
+			return null;
+		}
+		return new IndiaRefState(
+			indiaRef.getName(),
+			indiaRef.getAddress(),
+			indiaRef.getState(),
+			indiaRef.getDistrict(),
+			indiaRef.getPhone()
+		);
+	}
+
+	private static HomeCountryRefState toHomeCountryRef(Application.HomeCountryRef homeCountryRef) {
+		if (homeCountryRef == null) {
+			return null;
+		}
+		return new HomeCountryRefState(
+			homeCountryRef.getName(),
+			homeCountryRef.getAddress(),
+			homeCountryRef.getPhone()
 		);
 	}
 
