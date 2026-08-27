@@ -30,17 +30,23 @@ public class ContactApplicationService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email and confirm email must match.");
 		}
 
-		Application application = new Application();
+		Application application = request.applicationId() == null
+			? new Application()
+			: repository.findById(request.applicationId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found."));
+
 		Contact contact = new Contact();
 		contact.setDetails(request.email(), request.countryCode(), request.phone());
 		application.setContact(contact);
 		application.setCurrentSection("CONTACT");
 		application.markDraft();
-		application.setCreatedAt(LocalDateTime.now());
+		if (application.getCreatedAt() == null) {
+			application.setCreatedAt(LocalDateTime.now());
+		}
 		application.setLastUpdatedAt(LocalDateTime.now());
 
 		Application saved = repository.save(application);
-		return new ContactSaveResponse(saved.getId(), saved.getApplicationStatus().name(), saved.getContact().getEmail(), saved.getContact().getCountryCode(), saved.getContact().getPhone());
+		return new ContactSaveResponse(saved.getId(), saved.getTempId(), saved.getApplicationStatus().name(), saved.getContact().getEmail(), saved.getContact().getCountryCode(), saved.getContact().getPhone());
 	}
 
 	public OtpResponse triggerOtp(long applicationId, OtpChannel channel) {
@@ -81,14 +87,14 @@ public class ContactApplicationService {
 
 		application.setLastUpdatedAt(LocalDateTime.now());
 		application.setApplicationStatus(ApplicationStatus.SUBMITTED);
-		application.setCurrentSection("IDENTITY");
+		application.setCurrentSection("ADDRESS");
 		repository.save(application);
 
 		return new VerifyResponse(
 			applicationId,
 			application.getTempId(),
 			application.getCurrentSection(),
-			List.of("CONTACT"),
+			completedSections(application),
 			List.of(
 				new DispatchLine("SMS", "Simulated SMS dispatch for " + contact.getPhone()),
 				new DispatchLine("WhatsApp", "Simulated WhatsApp dispatch for " + contact.getPhone()),
@@ -108,5 +114,22 @@ public class ContactApplicationService {
 			builder.append(ALPHANUMERIC[RANDOM.nextInt(ALPHANUMERIC.length)]);
 		}
 		return builder.toString();
+	}
+
+	private static List<String> completedSections(Application application) {
+		List<String> sections = new java.util.ArrayList<>();
+		if (application.getApplicationContext() != null) {
+			sections.add("APPLICATION_CONTEXT");
+		}
+		if (application.getIdentity() != null) {
+			sections.add("IDENTITY");
+		}
+		if (application.getPassport() != null) {
+			sections.add("PASSPORT");
+		}
+		if (application.getContact() != null && application.getContact().isEmailVerified() && application.getContact().isPhoneVerified()) {
+			sections.add("CONTACT");
+		}
+		return sections;
 	}
 }

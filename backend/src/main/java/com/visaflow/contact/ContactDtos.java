@@ -2,10 +2,10 @@ package com.visaflow.contact;
 
 import java.util.List;
 
-record ContactSaveRequest(String email, String confirmEmail, String countryCode, String phone) {
+record ContactSaveRequest(Long applicationId, String email, String confirmEmail, String countryCode, String phone) {
 }
 
-record ContactSaveResponse(Long applicationId, String applicationStatus, String email, String countryCode, String phone) {
+record ContactSaveResponse(Long applicationId, String tempId, String applicationStatus, String email, String countryCode, String phone) {
 }
 
 record OtpResponse(Long applicationId, String channel, String otp) {

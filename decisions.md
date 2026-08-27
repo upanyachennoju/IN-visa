@@ -9,3 +9,5 @@
 - Used direct `http://localhost:8080` API calls from the browser — simplest path for this single-screen prototype with simulated delivery.
 - Stored the current section on the application record — the resume endpoint can restore the user to the section they last reached without inventing a separate state store.
 - Used hash-based app navigation for `#/resume` and `#/app/{tempId}` — it works cleanly with the file-based browser context while keeping the shell lightweight.
+- Created the draft on Application Context save and returned both `applicationId` and `tempId` — the shell can resume by `tempId` while still using the older Contact OTP endpoints by numeric id.
+- Used a synthetic passport pattern of `VF-XXXXXX` — it is obviously fake and avoids validating any real-world passport scheme.

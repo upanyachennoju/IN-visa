@@ -1,22 +1,10 @@
 package com.visaflow.application;
 
-import java.util.List;
 import java.time.LocalDate;
+import java.util.List;
 
-record ApplicationStateResponse(
-	Long applicationId,
+record ApplicationContextRequest(
 	String tempId,
-	String currentSection,
-	List<String> completedSections,
-	String applicationStatus,
-	ApplicationContextState applicationContext,
-	IdentityState identity,
-	PassportState passport,
-	ContactState contact
-) {
-}
-
-record ApplicationContextState(
 	String countryApplyingFrom,
 	String indianMission,
 	String nationality,
@@ -28,7 +16,7 @@ record ApplicationContextState(
 ) {
 }
 
-record IdentityState(
+record IdentityRequest(
 	String firstName,
 	String lastName,
 	String previousName,
@@ -46,21 +34,12 @@ record IdentityState(
 ) {
 }
 
-record PassportState(
+record PassportRequest(
 	String number,
 	String placeOfIssue,
 	LocalDate dateOfIssue,
 	LocalDate dateOfExpiry,
 	Boolean hasAdditionalPassport,
 	String additionalPassportDetails
-) {
-}
-
-record ContactState(
-	String email,
-	String countryCode,
-	String phone,
-	Boolean emailVerified,
-	Boolean phoneVerified
 ) {
 }

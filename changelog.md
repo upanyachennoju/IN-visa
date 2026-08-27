@@ -15,3 +15,7 @@
 ## 2026-08-27
 - Step 3: Added the 15-section navigation shell, the tempId resume entry point, backend application-state lookup by tempId, and wired the existing Contact screen into the shell.
 - Files touched: `backend/src/main/java/com/visaflow/application/Application.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateController.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateDtos.java`, `backend/src/main/java/com/visaflow/contact/ContactApplicationService.java`, `backend/src/main/java/com/visaflow/contact/ContactDtos.java`, `frontend/src/App.jsx`, `frontend/src/styles.css`
+
+## 2026-08-27
+- Step 4: Added save-and-continue form UIs and backend save endpoints for Application Context, Identity, and Passport, plus the shared section-state response shape used by the shell and resume flow.
+- Files touched: `backend/src/main/java/com/visaflow/application/Application.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionController.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionDtos.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionService.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateController.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateDtos.java`, `backend/src/main/java/com/visaflow/contact/ContactApplicationService.java`, `backend/src/main/java/com/visaflow/contact/ContactDtos.java`, `frontend/src/App.jsx`, `frontend/src/styles.css`
