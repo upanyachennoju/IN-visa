@@ -127,6 +127,15 @@ public class ContactApplicationService {
 		if (application.getPassport() != null) {
 			sections.add("PASSPORT");
 		}
+		if (application.getAddress() != null) {
+			sections.add("ADDRESS");
+		}
+		if (application.getFamily() != null) {
+			sections.add("FAMILY");
+		}
+		if (application.getOccupation() != null) {
+			sections.add("OCCUPATION");
+		}
 		if (application.getContact() != null && application.getContact().isEmailVerified() && application.getContact().isPhoneVerified()) {
 			sections.add("CONTACT");
 		}

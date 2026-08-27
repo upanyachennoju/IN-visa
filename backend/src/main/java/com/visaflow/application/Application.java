@@ -440,6 +440,54 @@ public class Application {
 
 		protected Address() {
 		}
+
+		public PresentAddress getPresent() {
+			return present;
+		}
+
+		public void setPresent(PresentAddress present) {
+			this.present = present;
+		}
+
+		public PermanentAddress getPermanent() {
+			return permanent;
+		}
+
+		public void setPermanent(PermanentAddress permanent) {
+			this.permanent = permanent;
+		}
+
+		public Boolean getSameAsPresent() {
+			return sameAsPresent;
+		}
+
+		public void setSameAsPresent(Boolean sameAsPresent) {
+			this.sameAsPresent = sameAsPresent;
+		}
+
+		public String getPostalCode() {
+			return postalCode;
+		}
+
+		public void setPostalCode(String postalCode) {
+			this.postalCode = postalCode;
+		}
+
+		public String getPhone() {
+			return phone;
+		}
+
+		public void setPhone(String phone) {
+			this.phone = phone;
+		}
+
+		public String getMobile() {
+			return mobile;
+		}
+
+		public void setMobile(String mobile) {
+			this.mobile = mobile;
+		}
 	}
 
 	@Embeddable
@@ -452,6 +500,46 @@ public class Application {
 
 		protected PresentAddress() {
 		}
+
+		public String getLine1() {
+			return line1;
+		}
+
+		public void setLine1(String line1) {
+			this.line1 = line1;
+		}
+
+		public String getLine2() {
+			return line2;
+		}
+
+		public void setLine2(String line2) {
+			this.line2 = line2;
+		}
+
+		public String getCity() {
+			return city;
+		}
+
+		public void setCity(String city) {
+			this.city = city;
+		}
+
+		public String getState() {
+			return state;
+		}
+
+		public void setState(String state) {
+			this.state = state;
+		}
+
+		public String getCountry() {
+			return country;
+		}
+
+		public void setCountry(String country) {
+			this.country = country;
+		}
 	}
 
 	@Embeddable
@@ -463,6 +551,46 @@ public class Application {
 		private String country;
 
 		protected PermanentAddress() {
+		}
+
+		public String getLine1() {
+			return line1;
+		}
+
+		public void setLine1(String line1) {
+			this.line1 = line1;
+		}
+
+		public String getLine2() {
+			return line2;
+		}
+
+		public void setLine2(String line2) {
+			this.line2 = line2;
+		}
+
+		public String getCity() {
+			return city;
+		}
+
+		public void setCity(String city) {
+			this.city = city;
+		}
+
+		public String getState() {
+			return state;
+		}
+
+		public void setState(String state) {
+			this.state = state;
+		}
+
+		public String getCountry() {
+			return country;
+		}
+
+		public void setCountry(String country) {
+			this.country = country;
 		}
 	}
 
@@ -483,6 +611,102 @@ public class Application {
 
 		protected Family() {
 		}
+
+		public String getFatherName() {
+			return fatherName;
+		}
+
+		public void setFatherName(String fatherName) {
+			this.fatherName = fatherName;
+		}
+
+		public String getFatherNationality() {
+			return fatherNationality;
+		}
+
+		public void setFatherNationality(String fatherNationality) {
+			this.fatherNationality = fatherNationality;
+		}
+
+		public String getFatherPrevNationality() {
+			return fatherPrevNationality;
+		}
+
+		public void setFatherPrevNationality(String fatherPrevNationality) {
+			this.fatherPrevNationality = fatherPrevNationality;
+		}
+
+		public String getFatherBirthplace() {
+			return fatherBirthplace;
+		}
+
+		public void setFatherBirthplace(String fatherBirthplace) {
+			this.fatherBirthplace = fatherBirthplace;
+		}
+
+		public String getFatherBirthCountry() {
+			return fatherBirthCountry;
+		}
+
+		public void setFatherBirthCountry(String fatherBirthCountry) {
+			this.fatherBirthCountry = fatherBirthCountry;
+		}
+
+		public String getMotherName() {
+			return motherName;
+		}
+
+		public void setMotherName(String motherName) {
+			this.motherName = motherName;
+		}
+
+		public String getMotherNationality() {
+			return motherNationality;
+		}
+
+		public void setMotherNationality(String motherNationality) {
+			this.motherNationality = motherNationality;
+		}
+
+		public String getMotherPrevNationality() {
+			return motherPrevNationality;
+		}
+
+		public void setMotherPrevNationality(String motherPrevNationality) {
+			this.motherPrevNationality = motherPrevNationality;
+		}
+
+		public String getMotherBirthplace() {
+			return motherBirthplace;
+		}
+
+		public void setMotherBirthplace(String motherBirthplace) {
+			this.motherBirthplace = motherBirthplace;
+		}
+
+		public String getMotherBirthCountry() {
+			return motherBirthCountry;
+		}
+
+		public void setMotherBirthCountry(String motherBirthCountry) {
+			this.motherBirthCountry = motherBirthCountry;
+		}
+
+		public Boolean getGrandparentPakistanOrigin() {
+			return grandparentPakistanOrigin;
+		}
+
+		public void setGrandparentPakistanOrigin(Boolean grandparentPakistanOrigin) {
+			this.grandparentPakistanOrigin = grandparentPakistanOrigin;
+		}
+
+		public String getMaritalStatus() {
+			return maritalStatus;
+		}
+
+		public void setMaritalStatus(String maritalStatus) {
+			this.maritalStatus = maritalStatus;
+		}
 	}
 
 	@Embeddable
@@ -496,6 +720,62 @@ public class Application {
 		private String militaryBackground;
 
 		protected Occupation() {
+		}
+
+		public String getCurrent() {
+			return current;
+		}
+
+		public void setCurrent(String current) {
+			this.current = current;
+		}
+
+		public String getEmployer() {
+			return employer;
+		}
+
+		public void setEmployer(String employer) {
+			this.employer = employer;
+		}
+
+		public String getDesignation() {
+			return designation;
+		}
+
+		public void setDesignation(String designation) {
+			this.designation = designation;
+		}
+
+		public String getEmployerAddress() {
+			return employerAddress;
+		}
+
+		public void setEmployerAddress(String employerAddress) {
+			this.employerAddress = employerAddress;
+		}
+
+		public String getEmployerPhone() {
+			return employerPhone;
+		}
+
+		public void setEmployerPhone(String employerPhone) {
+			this.employerPhone = employerPhone;
+		}
+
+		public String getPrevious() {
+			return previous;
+		}
+
+		public void setPrevious(String previous) {
+			this.previous = previous;
+		}
+
+		public String getMilitaryBackground() {
+			return militaryBackground;
+		}
+
+		public void setMilitaryBackground(String militaryBackground) {
+			this.militaryBackground = militaryBackground;
 		}
 	}
 
@@ -644,6 +924,30 @@ public class Application {
 
 	public void setPassport(Passport passport) {
 		this.passport = passport;
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	public Family getFamily() {
+		return family;
+	}
+
+	public void setFamily(Family family) {
+		this.family = family;
+	}
+
+	public Occupation getOccupation() {
+		return occupation;
+	}
+
+	public void setOccupation(Occupation occupation) {
+		this.occupation = occupation;
 	}
 
 	public Contact getContact() {

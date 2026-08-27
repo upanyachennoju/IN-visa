@@ -32,4 +32,19 @@ public class ApplicationSectionController {
 	public ApplicationStateResponse savePassport(@PathVariable String tempId, @RequestBody PassportRequest request) {
 		return service.savePassport(tempId, request);
 	}
+
+	@PostMapping("/{tempId}/address")
+	public ApplicationStateResponse saveAddress(@PathVariable String tempId, @RequestBody AddressRequest request) {
+		return service.saveAddress(tempId, request);
+	}
+
+	@PostMapping("/{tempId}/family")
+	public ApplicationStateResponse saveFamily(@PathVariable String tempId, @RequestBody FamilyRequest request) {
+		return service.saveFamily(tempId, request);
+	}
+
+	@PostMapping("/{tempId}/occupation")
+	public ApplicationStateResponse saveOccupation(@PathVariable String tempId, @RequestBody OccupationRequest request) {
+		return service.saveOccupation(tempId, request);
+	}
 }

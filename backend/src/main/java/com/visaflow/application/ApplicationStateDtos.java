@@ -12,6 +12,9 @@ record ApplicationStateResponse(
 	ApplicationContextState applicationContext,
 	IdentityState identity,
 	PassportState passport,
+	AddressState address,
+	FamilyState family,
+	OccupationState occupation,
 	ContactState contact
 ) {
 }
@@ -53,6 +56,52 @@ record PassportState(
 	LocalDate dateOfExpiry,
 	Boolean hasAdditionalPassport,
 	String additionalPassportDetails
+) {
+}
+
+record AddressState(
+	AddressLineState present,
+	AddressLineState permanent,
+	Boolean sameAsPresent,
+	String postalCode,
+	String phone,
+	String mobile
+) {
+}
+
+record AddressLineState(
+	String line1,
+	String line2,
+	String city,
+	String state,
+	String country
+) {
+}
+
+record FamilyState(
+	String fatherName,
+	String fatherNationality,
+	String fatherPrevNationality,
+	String fatherBirthplace,
+	String fatherBirthCountry,
+	String motherName,
+	String motherNationality,
+	String motherPrevNationality,
+	String motherBirthplace,
+	String motherBirthCountry,
+	Boolean grandparentPakistanOrigin,
+	String maritalStatus
+) {
+}
+
+record OccupationState(
+	String current,
+	String employer,
+	String designation,
+	String employerAddress,
+	String employerPhone,
+	String previous,
+	String militaryBackground
 ) {
 }
 

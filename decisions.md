@@ -11,3 +11,4 @@
 - Used hash-based app navigation for `#/resume` and `#/app/{tempId}` — it works cleanly with the file-based browser context while keeping the shell lightweight.
 - Created the draft on Application Context save and returned both `applicationId` and `tempId` — the shell can resume by `tempId` while still using the older Contact OTP endpoints by numeric id.
 - Used a synthetic passport pattern of `VF-XXXXXX` — it is obviously fake and avoids validating any real-world passport scheme.
+- Mirrored present address into permanent address when "same as present" is checked — that keeps the Address section simple while still sending a complete payload to the backend.

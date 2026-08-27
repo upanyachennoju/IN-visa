@@ -43,3 +43,51 @@ record PassportRequest(
 	String additionalPassportDetails
 ) {
 }
+
+record AddressRequest(
+	String tempId,
+	String presentLine1,
+	String presentLine2,
+	String presentCity,
+	String presentState,
+	String presentCountry,
+	String permanentLine1,
+	String permanentLine2,
+	String permanentCity,
+	String permanentState,
+	String permanentCountry,
+	Boolean sameAsPresent,
+	String postalCode,
+	String phone,
+	String mobile
+) {
+}
+
+record FamilyRequest(
+	String tempId,
+	String fatherName,
+	String fatherNationality,
+	String fatherPrevNationality,
+	String fatherBirthplace,
+	String fatherBirthCountry,
+	String motherName,
+	String motherNationality,
+	String motherPrevNationality,
+	String motherBirthplace,
+	String motherBirthCountry,
+	Boolean grandparentPakistanOrigin,
+	String maritalStatus
+) {
+}
+
+record OccupationRequest(
+	String tempId,
+	String current,
+	String employer,
+	String designation,
+	String employerAddress,
+	String employerPhone,
+	String previous,
+	String militaryBackground
+) {
+}

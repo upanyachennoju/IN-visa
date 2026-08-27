@@ -28,7 +28,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -40,7 +41,8 @@ button {
   padding: 10px 14px;
 }
 
-input {
+input,
+select {
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 10px 12px;

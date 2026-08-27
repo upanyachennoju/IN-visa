@@ -129,6 +129,118 @@ public class ApplicationSectionService {
 		return toResponse(application);
 	}
 
+	public ApplicationStateResponse saveAddress(String tempId, AddressRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.presentLine1(), "presentLine1");
+		validateRequired(request.presentCity(), "presentCity");
+		validateRequired(request.presentState(), "presentState");
+		validateRequired(request.presentCountry(), "presentCountry");
+		validateRequired(request.postalCode(), "postalCode");
+		validateRequired(request.phone(), "phone");
+		validateRequired(request.mobile(), "mobile");
+
+		boolean sameAsPresent = Boolean.TRUE.equals(request.sameAsPresent());
+		if (!sameAsPresent) {
+			validateRequired(request.permanentLine1(), "permanentLine1");
+			validateRequired(request.permanentCity(), "permanentCity");
+			validateRequired(request.permanentState(), "permanentState");
+			validateRequired(request.permanentCountry(), "permanentCountry");
+		}
+
+		Application.PresentAddress present = new Application.PresentAddress();
+		present.setLine1(request.presentLine1());
+		present.setLine2(request.presentLine2());
+		present.setCity(request.presentCity());
+		present.setState(request.presentState());
+		present.setCountry(request.presentCountry());
+
+		Application.PermanentAddress permanent = new Application.PermanentAddress();
+		permanent.setLine1(sameAsPresent ? request.presentLine1() : request.permanentLine1());
+		permanent.setLine2(sameAsPresent ? request.presentLine2() : request.permanentLine2());
+		permanent.setCity(sameAsPresent ? request.presentCity() : request.permanentCity());
+		permanent.setState(sameAsPresent ? request.presentState() : request.permanentState());
+		permanent.setCountry(sameAsPresent ? request.presentCountry() : request.permanentCountry());
+
+		Application.Address address = new Application.Address();
+		address.setPresent(present);
+		address.setPermanent(permanent);
+		address.setSameAsPresent(sameAsPresent);
+		address.setPostalCode(request.postalCode());
+		address.setPhone(request.phone());
+		address.setMobile(request.mobile());
+
+		application.setAddress(address);
+		application.setCurrentSection("FAMILY");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
+	public ApplicationStateResponse saveFamily(String tempId, FamilyRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.fatherName(), "fatherName");
+		validateRequired(request.fatherNationality(), "fatherNationality");
+		validateRequired(request.fatherPrevNationality(), "fatherPrevNationality");
+		validateRequired(request.fatherBirthplace(), "fatherBirthplace");
+		validateRequired(request.fatherBirthCountry(), "fatherBirthCountry");
+		validateRequired(request.motherName(), "motherName");
+		validateRequired(request.motherNationality(), "motherNationality");
+		validateRequired(request.motherPrevNationality(), "motherPrevNationality");
+		validateRequired(request.motherBirthplace(), "motherBirthplace");
+		validateRequired(request.motherBirthCountry(), "motherBirthCountry");
+		validateRequired(request.grandparentPakistanOrigin(), "grandparentPakistanOrigin");
+		validateRequired(request.maritalStatus(), "maritalStatus");
+
+		Application.Family family = new Application.Family();
+		family.setFatherName(request.fatherName());
+		family.setFatherNationality(request.fatherNationality());
+		family.setFatherPrevNationality(request.fatherPrevNationality());
+		family.setFatherBirthplace(request.fatherBirthplace());
+		family.setFatherBirthCountry(request.fatherBirthCountry());
+		family.setMotherName(request.motherName());
+		family.setMotherNationality(request.motherNationality());
+		family.setMotherPrevNationality(request.motherPrevNationality());
+		family.setMotherBirthplace(request.motherBirthplace());
+		family.setMotherBirthCountry(request.motherBirthCountry());
+		family.setGrandparentPakistanOrigin(request.grandparentPakistanOrigin());
+		family.setMaritalStatus(request.maritalStatus());
+
+		application.setFamily(family);
+		application.setCurrentSection("OCCUPATION");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
+	public ApplicationStateResponse saveOccupation(String tempId, OccupationRequest request) {
+		Application application = loadApplication(tempId);
+		validateRequired(request.current(), "current");
+		validateRequired(request.employer(), "employer");
+		validateRequired(request.designation(), "designation");
+		validateRequired(request.employerAddress(), "employerAddress");
+		validateRequired(request.employerPhone(), "employerPhone");
+		validateRequired(request.previous(), "previous");
+		validateRequired(request.militaryBackground(), "militaryBackground");
+
+		Application.Occupation occupation = new Application.Occupation();
+		occupation.setCurrent(request.current());
+		occupation.setEmployer(request.employer());
+		occupation.setDesignation(request.designation());
+		occupation.setEmployerAddress(request.employerAddress());
+		occupation.setEmployerPhone(request.employerPhone());
+		occupation.setPrevious(request.previous());
+		occupation.setMilitaryBackground(request.militaryBackground());
+
+		application.setOccupation(occupation);
+		application.setCurrentSection("CONTACT");
+		application.markDraft();
+		application.setLastUpdatedAt(LocalDateTime.now());
+		repository.save(application);
+		return toResponse(application);
+	}
+
 	public ApplicationStateResponse loadState(String tempId) {
 		return toResponse(loadApplication(tempId));
 	}
@@ -165,6 +277,9 @@ public class ApplicationSectionService {
 			toContext(application.getApplicationContext()),
 			toIdentity(application.getIdentity()),
 			toPassport(application.getPassport()),
+			toAddress(application.getAddress()),
+			toFamily(application.getFamily()),
+			toOccupation(application.getOccupation()),
 			toContact(application.getContact())
 		);
 	}
@@ -179,6 +294,15 @@ public class ApplicationSectionService {
 		}
 		if (application.getPassport() != null) {
 			sections.add("PASSPORT");
+		}
+		if (application.getAddress() != null) {
+			sections.add("ADDRESS");
+		}
+		if (application.getFamily() != null) {
+			sections.add("FAMILY");
+		}
+		if (application.getOccupation() != null) {
+			sections.add("OCCUPATION");
 		}
 		if (application.getContact() != null && application.getContact().isEmailVerified() && application.getContact().isPhoneVerified()) {
 			sections.add("CONTACT");
@@ -235,6 +359,69 @@ public class ApplicationSectionService {
 			passport.getDateOfExpiry(),
 			passport.getHasAdditionalPassport(),
 			passport.getAdditionalPassportDetails()
+		);
+	}
+
+	private static AddressState toAddress(Application.Address address) {
+		if (address == null) {
+			return null;
+		}
+		return new AddressState(
+			toAddressLine(address.getPresent()),
+			toAddressLine(address.getPermanent()),
+			address.getSameAsPresent(),
+			address.getPostalCode(),
+			address.getPhone(),
+			address.getMobile()
+		);
+	}
+
+	private static AddressLineState toAddressLine(Application.PresentAddress address) {
+		if (address == null) {
+			return null;
+		}
+		return new AddressLineState(address.getLine1(), address.getLine2(), address.getCity(), address.getState(), address.getCountry());
+	}
+
+	private static AddressLineState toAddressLine(Application.PermanentAddress address) {
+		if (address == null) {
+			return null;
+		}
+		return new AddressLineState(address.getLine1(), address.getLine2(), address.getCity(), address.getState(), address.getCountry());
+	}
+
+	private static FamilyState toFamily(Application.Family family) {
+		if (family == null) {
+			return null;
+		}
+		return new FamilyState(
+			family.getFatherName(),
+			family.getFatherNationality(),
+			family.getFatherPrevNationality(),
+			family.getFatherBirthplace(),
+			family.getFatherBirthCountry(),
+			family.getMotherName(),
+			family.getMotherNationality(),
+			family.getMotherPrevNationality(),
+			family.getMotherBirthplace(),
+			family.getMotherBirthCountry(),
+			family.getGrandparentPakistanOrigin(),
+			family.getMaritalStatus()
+		);
+	}
+
+	private static OccupationState toOccupation(Application.Occupation occupation) {
+		if (occupation == null) {
+			return null;
+		}
+		return new OccupationState(
+			occupation.getCurrent(),
+			occupation.getEmployer(),
+			occupation.getDesignation(),
+			occupation.getEmployerAddress(),
+			occupation.getEmployerPhone(),
+			occupation.getPrevious(),
+			occupation.getMilitaryBackground()
 		);
 	}
 

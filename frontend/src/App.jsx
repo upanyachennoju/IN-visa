@@ -83,6 +83,48 @@ const EMPTY_CONTACT_FORM = {
   phone: '',
 };
 
+const EMPTY_ADDRESS_FORM = {
+  sameAsPresent: false,
+  presentLine1: '',
+  presentLine2: '',
+  presentCity: '',
+  presentState: '',
+  presentCountry: '',
+  permanentLine1: '',
+  permanentLine2: '',
+  permanentCity: '',
+  permanentState: '',
+  permanentCountry: '',
+  postalCode: '',
+  phone: '',
+  mobile: '',
+};
+
+const EMPTY_FAMILY_FORM = {
+  fatherName: '',
+  fatherNationality: '',
+  fatherPrevNationality: '',
+  fatherBirthplace: '',
+  fatherBirthCountry: '',
+  motherName: '',
+  motherNationality: '',
+  motherPrevNationality: '',
+  motherBirthplace: '',
+  motherBirthCountry: '',
+  grandparentPakistanOrigin: '',
+  maritalStatus: '',
+};
+
+const EMPTY_OCCUPATION_FORM = {
+  current: '',
+  employer: '',
+  designation: '',
+  employerAddress: '',
+  employerPhone: '',
+  previous: '',
+  militaryBackground: '',
+};
+
 function parseRoute() {
   const hash = window.location.hash.replace(/^#\/?/, '');
   if (hash.startsWith('resume')) {
@@ -104,6 +146,9 @@ function normalizeResponse(data) {
     applicationContext: data.applicationContext || null,
     identity: data.identity || null,
     passport: data.passport || null,
+    address: data.address || null,
+    family: data.family || null,
+    occupation: data.occupation || null,
     contact: data.contact || null,
   };
 }
@@ -166,6 +211,62 @@ function buildContactForm(application) {
   };
 }
 
+function buildAddressForm(application) {
+  const address = application.address || {};
+  const present = address.present || {};
+  const permanent = address.permanent || {};
+  return {
+    sameAsPresent: Boolean(address.sameAsPresent),
+    presentLine1: present.line1 || '',
+    presentLine2: present.line2 || '',
+    presentCity: present.city || '',
+    presentState: present.state || '',
+    presentCountry: present.country || '',
+    permanentLine1: permanent.line1 || '',
+    permanentLine2: permanent.line2 || '',
+    permanentCity: permanent.city || '',
+    permanentState: permanent.state || '',
+    permanentCountry: permanent.country || '',
+    postalCode: address.postalCode || '',
+    phone: address.phone || '',
+    mobile: address.mobile || '',
+  };
+}
+
+function buildFamilyForm(application) {
+  const family = application.family || {};
+  return {
+    fatherName: family.fatherName || '',
+    fatherNationality: family.fatherNationality || '',
+    fatherPrevNationality: family.fatherPrevNationality || '',
+    fatherBirthplace: family.fatherBirthplace || '',
+    fatherBirthCountry: family.fatherBirthCountry || '',
+    motherName: family.motherName || '',
+    motherNationality: family.motherNationality || '',
+    motherPrevNationality: family.motherPrevNationality || '',
+    motherBirthplace: family.motherBirthplace || '',
+    motherBirthCountry: family.motherBirthCountry || '',
+    grandparentPakistanOrigin:
+      family.grandparentPakistanOrigin === null || family.grandparentPakistanOrigin === undefined
+        ? ''
+        : String(Boolean(family.grandparentPakistanOrigin)),
+    maritalStatus: family.maritalStatus || '',
+  };
+}
+
+function buildOccupationForm(application) {
+  const occupation = application.occupation || {};
+  return {
+    current: occupation.current || '',
+    employer: occupation.employer || '',
+    designation: occupation.designation || '',
+    employerAddress: occupation.employerAddress || '',
+    employerPhone: occupation.employerPhone || '',
+    previous: occupation.previous || '',
+    militaryBackground: occupation.militaryBackground || '',
+  };
+}
+
 function validateContextForm(form) {
   const errors = {};
   if (!form.countryApplyingFrom.trim()) errors.countryApplyingFrom = 'Required.';
@@ -215,6 +316,53 @@ function validateContactForm(form) {
   return errors;
 }
 
+function validateAddressForm(form) {
+  const errors = {};
+  if (!form.presentLine1.trim()) errors.presentLine1 = 'Required.';
+  if (!form.presentCity.trim()) errors.presentCity = 'Required.';
+  if (!form.presentState.trim()) errors.presentState = 'Required.';
+  if (!form.presentCountry.trim()) errors.presentCountry = 'Required.';
+  if (!form.postalCode.trim()) errors.postalCode = 'Required.';
+  if (!form.phone.trim()) errors.phone = 'Required.';
+  if (!form.mobile.trim()) errors.mobile = 'Required.';
+  if (!form.sameAsPresent) {
+    if (!form.permanentLine1.trim()) errors.permanentLine1 = 'Required.';
+    if (!form.permanentCity.trim()) errors.permanentCity = 'Required.';
+    if (!form.permanentState.trim()) errors.permanentState = 'Required.';
+    if (!form.permanentCountry.trim()) errors.permanentCountry = 'Required.';
+  }
+  return errors;
+}
+
+function validateFamilyForm(form) {
+  const errors = {};
+  if (!form.fatherName.trim()) errors.fatherName = 'Required.';
+  if (!form.fatherNationality.trim()) errors.fatherNationality = 'Required.';
+  if (!form.fatherPrevNationality.trim()) errors.fatherPrevNationality = 'Required.';
+  if (!form.fatherBirthplace.trim()) errors.fatherBirthplace = 'Required.';
+  if (!form.fatherBirthCountry.trim()) errors.fatherBirthCountry = 'Required.';
+  if (!form.motherName.trim()) errors.motherName = 'Required.';
+  if (!form.motherNationality.trim()) errors.motherNationality = 'Required.';
+  if (!form.motherPrevNationality.trim()) errors.motherPrevNationality = 'Required.';
+  if (!form.motherBirthplace.trim()) errors.motherBirthplace = 'Required.';
+  if (!form.motherBirthCountry.trim()) errors.motherBirthCountry = 'Required.';
+  if (form.grandparentPakistanOrigin === '') errors.grandparentPakistanOrigin = 'Required.';
+  if (!form.maritalStatus.trim()) errors.maritalStatus = 'Required.';
+  return errors;
+}
+
+function validateOccupationForm(form) {
+  const errors = {};
+  if (!form.current.trim()) errors.current = 'Required.';
+  if (!form.employer.trim()) errors.employer = 'Required.';
+  if (!form.designation.trim()) errors.designation = 'Required.';
+  if (!form.employerAddress.trim()) errors.employerAddress = 'Required.';
+  if (!form.employerPhone.trim()) errors.employerPhone = 'Required.';
+  if (!form.previous.trim()) errors.previous = 'Required.';
+  if (!form.militaryBackground.trim()) errors.militaryBackground = 'Required.';
+  return errors;
+}
+
 function sectionLabel(key) {
   return SECTION_STEPS.find((step) => step.key === key)?.label || 'Section';
 }
@@ -232,12 +380,18 @@ export default function App() {
   const [identityForm, setIdentityForm] = useState(EMPTY_IDENTITY_FORM);
   const [passportForm, setPassportForm] = useState(EMPTY_PASSPORT_FORM);
   const [contactForm, setContactForm] = useState(EMPTY_CONTACT_FORM);
+  const [addressForm, setAddressForm] = useState(EMPTY_ADDRESS_FORM);
+  const [familyForm, setFamilyForm] = useState(EMPTY_FAMILY_FORM);
+  const [occupationForm, setOccupationForm] = useState(EMPTY_OCCUPATION_FORM);
   const [emailOtp, setEmailOtp] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
   const [fieldErrors, setFieldErrors] = useState({
     APPLICATION_CONTEXT: {},
     IDENTITY: {},
     PASSPORT: {},
+    ADDRESS: {},
+    FAMILY: {},
+    OCCUPATION: {},
     CONTACT: {},
   });
   const [simulatedOtps, setSimulatedOtps] = useState({ email: '', phone: '' });
@@ -269,6 +423,9 @@ export default function App() {
           setContextForm(buildContextForm(nextApplication));
           setIdentityForm(buildIdentityForm(nextApplication));
           setPassportForm(buildPassportForm(nextApplication));
+          setAddressForm(buildAddressForm(nextApplication));
+          setFamilyForm(buildFamilyForm(nextApplication));
+          setOccupationForm(buildOccupationForm(nextApplication));
           setContactForm(buildContactForm(nextApplication));
           setEmailOtp('');
           setPhoneOtp('');
@@ -284,6 +441,9 @@ export default function App() {
       setContextForm(EMPTY_CONTEXT_FORM);
       setIdentityForm(EMPTY_IDENTITY_FORM);
       setPassportForm(EMPTY_PASSPORT_FORM);
+      setAddressForm(EMPTY_ADDRESS_FORM);
+      setFamilyForm(EMPTY_FAMILY_FORM);
+      setOccupationForm(EMPTY_OCCUPATION_FORM);
       setContactForm(EMPTY_CONTACT_FORM);
       setEmailOtp('');
       setPhoneOtp('');
@@ -291,6 +451,9 @@ export default function App() {
         APPLICATION_CONTEXT: {},
         IDENTITY: {},
         PASSPORT: {},
+        ADDRESS: {},
+        FAMILY: {},
+        OCCUPATION: {},
         CONTACT: {},
       });
       setVerificationResult(null);
@@ -307,6 +470,33 @@ export default function App() {
     if (canOpenSection(key)) {
       setActiveSection(key);
     }
+  }
+
+  function updateAddressField(field, value) {
+    setAddressForm((current) => {
+      const next = { ...current, [field]: value };
+      if (current.sameAsPresent && field.startsWith('present')) {
+        const permanentField = field.replace('present', 'permanent');
+        if (permanentField in next) {
+          next[permanentField] = value;
+        }
+      }
+      return next;
+    });
+  }
+
+  function toggleSameAsPresent(checked) {
+    setAddressForm((current) => {
+      const next = { ...current, sameAsPresent: checked };
+      if (checked) {
+        next.permanentLine1 = current.presentLine1;
+        next.permanentLine2 = current.presentLine2;
+        next.permanentCity = current.presentCity;
+        next.permanentState = current.presentState;
+        next.permanentCountry = current.presentCountry;
+      }
+      return next;
+    });
   }
 
   async function saveApplicationContext(event) {
@@ -405,6 +595,106 @@ export default function App() {
       setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
     } catch {
       setError('Passport save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveAddress(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateAddressForm(addressForm);
+    setFieldErrors((current) => ({ ...current, ADDRESS: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/address`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          ...addressForm,
+        }),
+      });
+      if (!response.ok) {
+        setError('Address save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setAddressForm(buildAddressForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Address save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveFamily(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateFamilyForm(familyForm);
+    setFieldErrors((current) => ({ ...current, FAMILY: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/family`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          ...familyForm,
+          grandparentPakistanOrigin: familyForm.grandparentPakistanOrigin === 'true',
+        }),
+      });
+      if (!response.ok) {
+        setError('Family save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setFamilyForm(buildFamilyForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Family save failed. Make sure the backend is running on port 8080.');
+    }
+  }
+
+  async function saveOccupation(event) {
+    event.preventDefault();
+    setError('');
+    const errors = validateOccupationForm(occupationForm);
+    setFieldErrors((current) => ({ ...current, OCCUPATION: errors }));
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/applications/${application.tempId}/occupation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tempId: application.tempId,
+          ...occupationForm,
+        }),
+      });
+      if (!response.ok) {
+        setError('Occupation save failed.');
+        return;
+      }
+
+      const result = normalizeResponse(await response.json());
+      setApplication(result);
+      setActiveSection(result.currentSection);
+      setOccupationForm(buildOccupationForm(result));
+      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
+    } catch {
+      setError('Occupation save failed. Make sure the backend is running on port 8080.');
     }
   }
 
@@ -871,6 +1161,329 @@ export default function App() {
                     <button type="submit">Verify OTPs</button>
                   </form>
                 ) : null}
+              </section>
+            ) : activeSection === 'ADDRESS' ? (
+              <section className="section-card">
+                <h2>Address</h2>
+                <form className="form-grid" onSubmit={saveAddress}>
+                  <label>
+                    Present line 1
+                    <input
+                      value={addressForm.presentLine1}
+                      onChange={(event) => updateAddressField('presentLine1', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.presentLine1 ? <span className="field-error">{fieldErrors.ADDRESS.presentLine1}</span> : null}
+                  </label>
+                  <label>
+                    Present line 2
+                    <input
+                      value={addressForm.presentLine2}
+                      onChange={(event) => updateAddressField('presentLine2', event.target.value)}
+                      type="text"
+                    />
+                  </label>
+                  <label>
+                    Present city
+                    <input
+                      value={addressForm.presentCity}
+                      onChange={(event) => updateAddressField('presentCity', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.presentCity ? <span className="field-error">{fieldErrors.ADDRESS.presentCity}</span> : null}
+                  </label>
+                  <label>
+                    Present state
+                    <input
+                      value={addressForm.presentState}
+                      onChange={(event) => updateAddressField('presentState', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.presentState ? <span className="field-error">{fieldErrors.ADDRESS.presentState}</span> : null}
+                  </label>
+                  <label>
+                    Present country
+                    <input
+                      value={addressForm.presentCountry}
+                      onChange={(event) => updateAddressField('presentCountry', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.presentCountry ? <span className="field-error">{fieldErrors.ADDRESS.presentCountry}</span> : null}
+                  </label>
+                  <label>
+                    <span>Same as present</span>
+                    <input
+                      checked={addressForm.sameAsPresent}
+                      onChange={(event) => toggleSameAsPresent(event.target.checked)}
+                      type="checkbox"
+                    />
+                  </label>
+                  <label>
+                    Permanent line 1
+                    <input
+                      value={addressForm.permanentLine1}
+                      onChange={(event) => updateAddressField('permanentLine1', event.target.value)}
+                      type="text"
+                      disabled={addressForm.sameAsPresent}
+                    />
+                    {fieldErrors.ADDRESS.permanentLine1 ? <span className="field-error">{fieldErrors.ADDRESS.permanentLine1}</span> : null}
+                  </label>
+                  <label>
+                    Permanent line 2
+                    <input
+                      value={addressForm.permanentLine2}
+                      onChange={(event) => updateAddressField('permanentLine2', event.target.value)}
+                      type="text"
+                      disabled={addressForm.sameAsPresent}
+                    />
+                  </label>
+                  <label>
+                    Permanent city
+                    <input
+                      value={addressForm.permanentCity}
+                      onChange={(event) => updateAddressField('permanentCity', event.target.value)}
+                      type="text"
+                      disabled={addressForm.sameAsPresent}
+                    />
+                    {fieldErrors.ADDRESS.permanentCity ? <span className="field-error">{fieldErrors.ADDRESS.permanentCity}</span> : null}
+                  </label>
+                  <label>
+                    Permanent state
+                    <input
+                      value={addressForm.permanentState}
+                      onChange={(event) => updateAddressField('permanentState', event.target.value)}
+                      type="text"
+                      disabled={addressForm.sameAsPresent}
+                    />
+                    {fieldErrors.ADDRESS.permanentState ? <span className="field-error">{fieldErrors.ADDRESS.permanentState}</span> : null}
+                  </label>
+                  <label>
+                    Permanent country
+                    <input
+                      value={addressForm.permanentCountry}
+                      onChange={(event) => updateAddressField('permanentCountry', event.target.value)}
+                      type="text"
+                      disabled={addressForm.sameAsPresent}
+                    />
+                    {fieldErrors.ADDRESS.permanentCountry ? <span className="field-error">{fieldErrors.ADDRESS.permanentCountry}</span> : null}
+                  </label>
+                  <label>
+                    Postal code
+                    <input
+                      value={addressForm.postalCode}
+                      onChange={(event) => updateAddressField('postalCode', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.postalCode ? <span className="field-error">{fieldErrors.ADDRESS.postalCode}</span> : null}
+                  </label>
+                  <label>
+                    Phone
+                    <input
+                      value={addressForm.phone}
+                      onChange={(event) => updateAddressField('phone', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.phone ? <span className="field-error">{fieldErrors.ADDRESS.phone}</span> : null}
+                  </label>
+                  <label>
+                    Mobile
+                    <input
+                      value={addressForm.mobile}
+                      onChange={(event) => updateAddressField('mobile', event.target.value)}
+                      type="text"
+                    />
+                    {fieldErrors.ADDRESS.mobile ? <span className="field-error">{fieldErrors.ADDRESS.mobile}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'FAMILY' ? (
+              <section className="section-card">
+                <h2>Family</h2>
+                <form className="form-grid" onSubmit={saveFamily}>
+                  <label>
+                    Father name
+                    <input
+                      value={familyForm.fatherName}
+                      onChange={(event) => setFamilyForm({ ...familyForm, fatherName: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.fatherName ? <span className="field-error">{fieldErrors.FAMILY.fatherName}</span> : null}
+                  </label>
+                  <label>
+                    Father nationality
+                    <input
+                      value={familyForm.fatherNationality}
+                      onChange={(event) => setFamilyForm({ ...familyForm, fatherNationality: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.fatherNationality ? <span className="field-error">{fieldErrors.FAMILY.fatherNationality}</span> : null}
+                  </label>
+                  <label>
+                    Father previous nationality
+                    <input
+                      value={familyForm.fatherPrevNationality}
+                      onChange={(event) => setFamilyForm({ ...familyForm, fatherPrevNationality: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.fatherPrevNationality ? <span className="field-error">{fieldErrors.FAMILY.fatherPrevNationality}</span> : null}
+                  </label>
+                  <label>
+                    Father birthplace
+                    <input
+                      value={familyForm.fatherBirthplace}
+                      onChange={(event) => setFamilyForm({ ...familyForm, fatherBirthplace: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.fatherBirthplace ? <span className="field-error">{fieldErrors.FAMILY.fatherBirthplace}</span> : null}
+                  </label>
+                  <label>
+                    Father birth country
+                    <input
+                      value={familyForm.fatherBirthCountry}
+                      onChange={(event) => setFamilyForm({ ...familyForm, fatherBirthCountry: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.fatherBirthCountry ? <span className="field-error">{fieldErrors.FAMILY.fatherBirthCountry}</span> : null}
+                  </label>
+                  <label>
+                    Mother name
+                    <input
+                      value={familyForm.motherName}
+                      onChange={(event) => setFamilyForm({ ...familyForm, motherName: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.motherName ? <span className="field-error">{fieldErrors.FAMILY.motherName}</span> : null}
+                  </label>
+                  <label>
+                    Mother nationality
+                    <input
+                      value={familyForm.motherNationality}
+                      onChange={(event) => setFamilyForm({ ...familyForm, motherNationality: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.motherNationality ? <span className="field-error">{fieldErrors.FAMILY.motherNationality}</span> : null}
+                  </label>
+                  <label>
+                    Mother previous nationality
+                    <input
+                      value={familyForm.motherPrevNationality}
+                      onChange={(event) => setFamilyForm({ ...familyForm, motherPrevNationality: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.motherPrevNationality ? <span className="field-error">{fieldErrors.FAMILY.motherPrevNationality}</span> : null}
+                  </label>
+                  <label>
+                    Mother birthplace
+                    <input
+                      value={familyForm.motherBirthplace}
+                      onChange={(event) => setFamilyForm({ ...familyForm, motherBirthplace: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.motherBirthplace ? <span className="field-error">{fieldErrors.FAMILY.motherBirthplace}</span> : null}
+                  </label>
+                  <label>
+                    Mother birth country
+                    <input
+                      value={familyForm.motherBirthCountry}
+                      onChange={(event) => setFamilyForm({ ...familyForm, motherBirthCountry: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.motherBirthCountry ? <span className="field-error">{fieldErrors.FAMILY.motherBirthCountry}</span> : null}
+                  </label>
+                  <label>
+                    Grandparent Pakistan origin
+                    <select
+                      value={familyForm.grandparentPakistanOrigin}
+                      onChange={(event) => setFamilyForm({ ...familyForm, grandparentPakistanOrigin: event.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                    {fieldErrors.FAMILY.grandparentPakistanOrigin ? <span className="field-error">{fieldErrors.FAMILY.grandparentPakistanOrigin}</span> : null}
+                  </label>
+                  <label>
+                    Marital status
+                    <input
+                      value={familyForm.maritalStatus}
+                      onChange={(event) => setFamilyForm({ ...familyForm, maritalStatus: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.FAMILY.maritalStatus ? <span className="field-error">{fieldErrors.FAMILY.maritalStatus}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
+              </section>
+            ) : activeSection === 'OCCUPATION' ? (
+              <section className="section-card">
+                <h2>Occupation</h2>
+                <form className="form-grid" onSubmit={saveOccupation}>
+                  <label>
+                    Current
+                    <input
+                      value={occupationForm.current}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, current: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.current ? <span className="field-error">{fieldErrors.OCCUPATION.current}</span> : null}
+                  </label>
+                  <label>
+                    Employer
+                    <input
+                      value={occupationForm.employer}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, employer: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.employer ? <span className="field-error">{fieldErrors.OCCUPATION.employer}</span> : null}
+                  </label>
+                  <label>
+                    Designation
+                    <input
+                      value={occupationForm.designation}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, designation: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.designation ? <span className="field-error">{fieldErrors.OCCUPATION.designation}</span> : null}
+                  </label>
+                  <label>
+                    Employer address
+                    <input
+                      value={occupationForm.employerAddress}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, employerAddress: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.employerAddress ? <span className="field-error">{fieldErrors.OCCUPATION.employerAddress}</span> : null}
+                  </label>
+                  <label>
+                    Employer phone
+                    <input
+                      value={occupationForm.employerPhone}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, employerPhone: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.employerPhone ? <span className="field-error">{fieldErrors.OCCUPATION.employerPhone}</span> : null}
+                  </label>
+                  <label>
+                    Previous
+                    <input
+                      value={occupationForm.previous}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, previous: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.previous ? <span className="field-error">{fieldErrors.OCCUPATION.previous}</span> : null}
+                  </label>
+                  <label>
+                    Military background
+                    <input
+                      value={occupationForm.militaryBackground}
+                      onChange={(event) => setOccupationForm({ ...occupationForm, militaryBackground: event.target.value })}
+                      type="text"
+                    />
+                    {fieldErrors.OCCUPATION.militaryBackground ? <span className="field-error">{fieldErrors.OCCUPATION.militaryBackground}</span> : null}
+                  </label>
+                  <button type="submit">Save and continue</button>
+                </form>
               </section>
             ) : (
               <section className="section-card placeholder-card">
