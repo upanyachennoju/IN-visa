@@ -6,8 +6,17 @@ const multer = require('multer');
 const Database = require('better-sqlite3');
 const { v4: uuidv4 } = require('uuid');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+const path = require('path');
+try {
+  require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+  require('dotenv').config();
+} catch (e) {}
+const MODEL_NAME = process.env.MODEL_NAME || 'openai/gpt-4o-mini';
 const { OpenAI } = require('openai');
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1'
+});
 
 const app = express();
 app.use(cors());
@@ -165,7 +174,7 @@ app.post('/api/documents/photo-check', upload.single('image'), async (req, res) 
     const prompt = `You are an automated photo quality checker for visa applications. Analyze the uploaded image and return a JSON object with the following boolean fields and a string field:\n{\n  "faceVisible": bool,\n  "faceCentered": bool,\n  "backgroundPlain": bool,\n  "resolutionAdequate": bool,\n  "hasBlurOrGlare": bool,\n  "overallPass": bool,\n  "fixInstruction": string\n}\nProvide ONLY the JSON. Do NOT add any extra commentary.`;
 
     const openAiPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini-vision',
+      model: MODEL_NAME,
       max_tokens: 500,
       temperature: 0,
       messages: [
@@ -220,7 +229,7 @@ Explain in ONE short, non-technical, simple sentence how the applicant can fix t
 Output ONLY strict JSON in the format: {"message": "string"}`;
 
     const openAiPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: MODEL_NAME,
       max_tokens: 150,
       temperature: 0.2,
       messages: [
@@ -250,7 +259,7 @@ app.post('/api/applications/:tempId/submit', (req, res) => {
 
   const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
   const sections = sectionsRows.reduce((acc, cur) => {
-    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) {}
+    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) { }
     return acc;
   }, {});
 
@@ -305,25 +314,25 @@ function getWaitTimeEstimate(visaType, purpose) {
 // ---------- Application Status Explainer Endpoint ----------
 app.get('/api/status/:finalReferenceNumber', async (req, res) => {
   const { finalReferenceNumber } = req.params;
-  
+
   let appRow = db.prepare('SELECT tempId, json FROM applications WHERE finalReferenceNumber = ?').get(finalReferenceNumber);
   if (!appRow) {
     appRow = db.prepare('SELECT tempId, json FROM applications WHERE tempId = ?').get(finalReferenceNumber);
   }
-  
+
   if (!appRow) {
     return res.status(404).json({ error: 'No application found with that reference number' });
   }
 
   let appData = {};
-  try { appData = JSON.parse(appRow.json); } catch (e) {}
+  try { appData = JSON.parse(appRow.json); } catch (e) { }
 
   const tempId = appRow.tempId;
   const status = appData.applicationStatus || 'SUBMITTED';
 
   const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
   const sections = sectionsRows.reduce((acc, cur) => {
-    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) {}
+    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) { }
     return acc;
   }, {});
 
@@ -342,7 +351,7 @@ Provide ONE warm, clear, citizen-focused sentence explaining what this status me
 Output ONLY strict JSON in format: {"explanation": "string"}`;
 
     const openAiPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: MODEL_NAME,
       max_tokens: 150,
       temperature: 0.3,
       messages: [
