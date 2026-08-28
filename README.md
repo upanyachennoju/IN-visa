@@ -64,10 +64,24 @@ cd backend
 npm install
 ```
 
-Set your OpenAI API key and start the server:
+Create a `.env` file in the project root:
 
 ```bash
-export OPENAI_API_KEY="your-openai-api-key"
+cp .env.example .env
+```
+
+Configure your environment variables in `.env`:
+
+```env
+PORT=3000
+OPENROUTER_API_KEY=sk-or-v1-your-key-here
+MODEL_NAME=openai/gpt-4o-mini
+```
+
+Then start the backend server:
+
+```bash
+cd backend
 npm run dev
 ```
 

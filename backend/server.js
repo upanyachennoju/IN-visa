@@ -13,10 +13,9 @@ try {
 } catch (e) {}
 const MODEL_NAME = process.env.MODEL_NAME || 'openai/gpt-4o-mini';
 const { OpenAI } = require('openai');
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1'
-});
+const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || 'dummy-key';
+const baseURL = process.env.OPENAI_BASE_URL || (process.env.OPENROUTER_API_KEY ? 'https://openrouter.ai/api/v1' : (process.env.OPENAI_API_KEY ? undefined : 'https://openrouter.ai/api/v1'));
+const openai = new OpenAI({ apiKey, baseURL });
 
 const app = express();
 app.use(cors());
