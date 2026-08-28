@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
-
 export default function ReviewSubmit({ tempId, onSubmitted }) {
   const [sections, setSections] = useState({});
   const [applicationData, setApplicationData] = useState({});
@@ -15,7 +13,7 @@ export default function ReviewSubmit({ tempId, onSubmitted }) {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:3000/api/applications/${tempId}`)
+    fetch(`/api/applications/${tempId}`)
       .then((res) => res.json())
       .then((data) => {
         setSections(data.sections || {
@@ -77,7 +75,7 @@ export default function ReviewSubmit({ tempId, onSubmitted }) {
     setSubmitErrors([]);
 
     try {
-      const res = await fetch(`http://localhost:3000/api/applications/${tempId}/submit`, {
+      const res = await fetch(`/api/applications/${tempId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

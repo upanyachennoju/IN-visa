@@ -14,7 +14,7 @@ export default function StatusPage({ initialRef }) {
     setError('');
     setStatusData(null);
 
-    fetch(`http://localhost:3000/api/status/${encodeURIComponent(ref.trim())}`)
+    fetch(`/api/status/${encodeURIComponent(ref.trim())}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Application reference number not found. Please check your number.');

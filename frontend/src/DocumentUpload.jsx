@@ -21,7 +21,7 @@ function SingleDocCheck({ label, tempId }) {
     formData.append('tempId', tempId);
 
     try {
-      const res = await fetch('http://localhost:3000/api/documents/photo-check', {
+      const res = await fetch('/api/documents/photo-check', {
         method: 'POST',
         body: formData,
       });
