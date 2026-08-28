@@ -206,5 +206,39 @@ app.post('/api/documents/photo-check', upload.single('image'), async (req, res) 
   }
 });
 
+// ---------- Plain-Language Error Explainer Endpoint ----------
+app.post('/api/explain-error', async (req, res) => {
+  const { field, error, context } = req.body || {};
+  if (!error) {
+    return res.status(400).json({ error: 'Raw error message is required' });
+  }
+
+  try {
+    const prompt = `You are an automated assistant for a visa application form. An applicant got a validation error on the field "${field || 'form field'}" (context: "${context || ''}").
+Raw error message: "${error}"
+Explain in ONE short, non-technical, simple sentence how the applicant can fix this error.
+Output ONLY strict JSON in the format: {"message": "string"}`;
+
+    const openAiPromise = openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 150,
+      temperature: 0.2,
+      messages: [
+        { role: 'system', content: 'You explain form validation errors simply and concisely. Output strict JSON only.' },
+        { role: 'user', content: prompt }
+      ]
+    });
+
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+    const result = await Promise.race([openAiPromise, timeoutPromise]);
+    const responseText = result.choices[0].message.content;
+    const parsed = JSON.parse(responseText);
+    res.json({ message: parsed.message || error });
+  } catch (err) {
+    // Fallback: return raw validation error message if AI call fails or times out
+    res.json({ message: error });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`VisaFlow backend listening on port ${PORT}`));

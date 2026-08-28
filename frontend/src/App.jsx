@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import DocumentUpload from './DocumentUpload';
+import { explainFieldErrors, getPlainLanguageError } from './errorExplainer';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -751,12 +752,42 @@ export default function App() {
     });
   }
 
+  async function applyErrorExplanations(sectionName, rawErrors) {
+    setFieldErrors((current) => ({ ...current, [sectionName]: rawErrors }));
+    if (Object.keys(rawErrors).length > 0) {
+      const explained = await explainFieldErrors(sectionName, rawErrors);
+      setFieldErrors((current) => ({ ...current, [sectionName]: explained }));
+    }
+  }
+
+  async function handleFieldBlur(sectionName, validator, form, fieldName) {
+    const errors = validator(form);
+    const rawError = errors[fieldName];
+    if (rawError) {
+      setFieldErrors((current) => ({
+        ...current,
+        [sectionName]: { ...current[sectionName], [fieldName]: rawError },
+      }));
+      const explained = await getPlainLanguageError(fieldName, rawError, sectionName);
+      setFieldErrors((current) => ({
+        ...current,
+        [sectionName]: { ...current[sectionName], [fieldName]: explained },
+      }));
+    } else {
+      setFieldErrors((current) => {
+        const copy = { ...(current[sectionName] || {}) };
+        delete copy[fieldName];
+        return { ...current, [sectionName]: copy };
+      });
+    }
+  }
+
   async function saveApplicationContext(event) {
     event.preventDefault();
     setError('');
     const errors = validateContextForm(contextForm);
-    setFieldErrors((current) => ({ ...current, APPLICATION_CONTEXT: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('APPLICATION_CONTEXT', errors);
       return;
     }
 
@@ -788,8 +819,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateIdentityForm(identityForm);
-    setFieldErrors((current) => ({ ...current, IDENTITY: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('IDENTITY', errors);
       return;
     }
 
@@ -824,8 +855,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validatePassportForm(passportForm);
-    setFieldErrors((current) => ({ ...current, PASSPORT: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('PASSPORT', errors);
       return;
     }
 
@@ -854,8 +885,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateAddressForm(addressForm);
-    setFieldErrors((current) => ({ ...current, ADDRESS: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('ADDRESS', errors);
       return;
     }
 
@@ -887,8 +918,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateFamilyForm(familyForm);
-    setFieldErrors((current) => ({ ...current, FAMILY: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('FAMILY', errors);
       return;
     }
 
@@ -921,8 +952,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateOccupationForm(occupationForm);
-    setFieldErrors((current) => ({ ...current, OCCUPATION: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('OCCUPATION', errors);
       return;
     }
 
@@ -954,8 +985,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateVisaTripForm(visaTripForm);
-    setFieldErrors((current) => ({ ...current, VISA_TRIP: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('VISA_TRIP', errors);
       return;
     }
 
@@ -988,8 +1019,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validatePreviousIndiaTravelForm(previousIndiaTravelForm);
-    setFieldErrors((current) => ({ ...current, PREVIOUS_INDIA_TRAVEL: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('PREVIOUS_INDIA_TRAVEL', errors);
       return;
     }
 
@@ -1025,8 +1056,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateTravelHistoryForm(travelHistoryForm);
-    setFieldErrors((current) => ({ ...current, TRAVEL_HISTORY: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('TRAVEL_HISTORY', errors);
       return;
     }
 
@@ -1059,8 +1090,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateReferencesForm(referencesForm);
-    setFieldErrors((current) => ({ ...current, REFERENCES: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('REFERENCES', errors);
       return;
     }
 
@@ -1103,8 +1134,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateBackgroundForm(backgroundForm);
-    setFieldErrors((current) => ({ ...current, BACKGROUND_ANSWERS: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('BACKGROUND_ANSWERS', errors);
       return;
     }
 
@@ -1147,8 +1178,8 @@ export default function App() {
     event.preventDefault();
     setError('');
     const errors = validateContactForm(contactForm);
-    setFieldErrors((current) => ({ ...current, CONTACT: errors }));
     if (Object.keys(errors).length > 0) {
+      applyErrorExplanations('CONTACT', errors);
       return;
     }
 
@@ -1342,6 +1373,7 @@ export default function App() {
                     <input
                       value={contextForm.countryApplyingFrom}
                       onChange={(event) => setContextForm({ ...contextForm, countryApplyingFrom: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'countryApplyingFrom')}
                       type="text"
                     />
                     {fieldErrors.APPLICATION_CONTEXT.countryApplyingFrom ? (
@@ -1353,6 +1385,7 @@ export default function App() {
                     <input
                       value={contextForm.indianMission}
                       onChange={(event) => setContextForm({ ...contextForm, indianMission: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'indianMission')}
                       type="text"
                     />
                     {fieldErrors.APPLICATION_CONTEXT.indianMission ? (
@@ -1364,6 +1397,7 @@ export default function App() {
                     <input
                       value={contextForm.nationality}
                       onChange={(event) => setContextForm({ ...contextForm, nationality: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'nationality')}
                       type="text"
                     />
                     {fieldErrors.APPLICATION_CONTEXT.nationality ? (
@@ -1375,6 +1409,7 @@ export default function App() {
                     <input
                       value={contextForm.passportType}
                       onChange={(event) => setContextForm({ ...contextForm, passportType: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'passportType')}
                       type="text"
                     />
                     {fieldErrors.APPLICATION_CONTEXT.passportType ? (
@@ -1386,6 +1421,7 @@ export default function App() {
                     <input
                       value={contextForm.portOfArrival}
                       onChange={(event) => setContextForm({ ...contextForm, portOfArrival: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'portOfArrival')}
                       type="text"
                     />
                     {fieldErrors.APPLICATION_CONTEXT.portOfArrival ? (
@@ -1397,6 +1433,7 @@ export default function App() {
                     <input
                       value={contextForm.expectedArrivalDate}
                       onChange={(event) => setContextForm({ ...contextForm, expectedArrivalDate: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'expectedArrivalDate')}
                       type="text"
                       placeholder="YYYY-MM-DD"
                     />
@@ -1409,6 +1446,7 @@ export default function App() {
                     <input
                       value={contextForm.dateOfBirth}
                       onChange={(event) => setContextForm({ ...contextForm, dateOfBirth: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'dateOfBirth')}
                       type="text"
                       placeholder="YYYY-MM-DD"
                     />
@@ -1421,6 +1459,7 @@ export default function App() {
                     <input
                       value={contextForm.visaPurpose}
                       onChange={(event) => setContextForm({ ...contextForm, visaPurpose: event.target.value })}
+                      onBlur={() => handleFieldBlur('APPLICATION_CONTEXT', validateContextForm, contextForm, 'visaPurpose')}
                       type="text"
                     />
                     {fieldErrors.APPLICATION_CONTEXT.visaPurpose ? (

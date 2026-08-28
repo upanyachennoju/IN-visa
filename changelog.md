@@ -35,5 +35,7 @@
 ## 2026-08-28
 - Express & File-based SQLite Migration: Migrated backend to Express + better-sqlite3 with file-based SQLite database (`data/visa_flow.db`).
 - Step 8 (Photo Quality Checker): Added `POST /api/documents/photo-check` endpoint with OpenAI `gpt-4o-mini-vision` integration, 5s timeout fallback, and `DocumentUpload` component in Section 13 (Documents).
-- Files touched: `backend/server.js`, `backend/package.json`, `frontend/src/DocumentUpload.jsx`, `frontend/src/App.jsx`, `changelog.md`, `decisions.md`, `flow.md`
+- Step 9 (Plain-Language Error Explainer): Added `POST /api/explain-error` endpoint using OpenAI `gpt-4o-mini` with raw error fallback, client-side caching & debouncing on blur/submit across all form sections.
+- Files touched: `backend/server.js`, `frontend/src/errorExplainer.js`, `frontend/src/App.jsx`, `changelog.md`, `decisions.md`, `flow.md`
+
 

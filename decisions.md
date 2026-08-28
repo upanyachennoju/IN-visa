@@ -17,4 +17,8 @@
 - Migrated backend to Express + file-based SQLite (`better-sqlite3`, `data/visa_flow.db`) — ensures persistence across server restarts while maintaining minimal overhead.
 - Used OpenAI Vision model `gpt-4o-mini-vision` for `POST /api/documents/photo-check` — selected for high vision accuracy, rapid response times, and cost efficiency.
 - Implemented a 5-second race-condition timeout fallback and error handling — if the OpenAI API call fails or times out after 5s, the system responds gracefully with `overallPass: false` and the instruction "We couldn't check your photo automatically — please make sure your face is clearly visible against a plain background." alongside specific guidance, preventing applicant UI dead ends.
+- Used OpenAI text model `gpt-4o-mini` for `POST /api/explain-error` — chosen for fast, low-cost execution and concise plain-language error translations.
+- Debounced and cached error explanations in `frontend/src/errorExplainer.js` — error explanations execute exclusively on field blur and section submission rather than per-keystroke to keep API traffic cheap and fast.
+- Graceful raw error fallback on API failure — if the `/api/explain-error` call fails or times out, the raw validation message is displayed to the applicant without blocking the submission flow.
+
 
