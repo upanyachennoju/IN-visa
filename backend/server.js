@@ -6,15 +6,24 @@ const multer = require('multer');
 const Database = require('better-sqlite3');
 const { v4: uuidv4 } = require('uuid');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+const path = require('path');
+try {
+  require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+  require('dotenv').config();
+} catch (e) {}
+const MODEL_NAME = process.env.MODEL_NAME || 'openai/gpt-4o-mini';
 const { OpenAI } = require('openai');
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1'
+});
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
 // Initialize SQLite database (file-based)
-const db = new Database('data/visa_flow.db');
+const db = new Database(path.resolve(__dirname, process.env.VISA_DB_PATH || 'data/visa_flow.db'));
 
 // Create tables if they don't exist
 db.exec(`
@@ -54,13 +63,43 @@ function upsertApplication(tempId, updates) {
   stmt.run(tempId, jsonStr);
 }
 
+const sectionConfig = {
+  'application-context': { property: 'applicationContext', key: 'APPLICATION_CONTEXT' }, identity: { property: 'identity', key: 'IDENTITY' }, passport: { property: 'passport', key: 'PASSPORT' }, contact: { property: 'contact', key: 'CONTACT' }, address: { property: 'address', key: 'ADDRESS' }, family: { property: 'family', key: 'FAMILY' }, occupation: { property: 'occupation', key: 'OCCUPATION' }, 'visa-trip': { property: 'visaTrip', key: 'VISA_TRIP' }, 'previous-india-travel': { property: 'previousIndiaTravel', key: 'PREVIOUS_INDIA_TRAVEL' }, 'travel-history': { property: 'travelHistory', key: 'TRAVEL_HISTORY' }, references: { property: 'references', key: 'REFERENCES' }, 'background-answers': { property: 'backgroundAnswers', key: 'BACKGROUND_ANSWERS' },
+};
+const sectionOrder = ['APPLICATION_CONTEXT', 'IDENTITY', 'PASSPORT', 'CONTACT', 'ADDRESS', 'FAMILY', 'OCCUPATION', 'VISA_TRIP', 'PREVIOUS_INDIA_TRAVEL', 'TRAVEL_HISTORY', 'REFERENCES', 'BACKGROUND_ANSWERS', 'DOCUMENTS', 'PHOTO_STATUS', 'SUBMISSION'];
+
+function readApplicationState(tempId) {
+  const row = db.prepare('SELECT id, json FROM applications WHERE tempId = ?').get(tempId);
+  if (!row) return null;
+  let application = {};
+  try { application = JSON.parse(row.json || '{}'); } catch (e) { application = {}; }
+  for (const section of db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId)) {
+    const config = sectionConfig[section.sectionName];
+    if (!config) continue;
+    try { application[config.property] = JSON.parse(section.data); } catch (e) { /* ignore malformed legacy data */ }
+  }
+  return { ...application, applicationId: String(row.id), tempId, currentSection: application.currentSection || 'APPLICATION_CONTEXT', completedSections: application.completedSections || [], applicationStatus: application.applicationStatus || 'DRAFT' };
+}
+
+function saveSection(tempId, section, data) {
+  const config = sectionConfig[section];
+  if (!config) return null;
+  const current = readApplicationState(tempId);
+  const completedSections = new Set(current?.completedSections || []);
+  completedSections.add(config.key);
+  const index = sectionOrder.indexOf(config.key);
+  const currentSection = index >= 0 && index < sectionOrder.length - 1 ? sectionOrder[index + 1] : config.key;
+  upsertApplication(tempId, { currentSection, completedSections: [...completedSections], applicationStatus: current?.applicationStatus || 'DRAFT' });
+  db.prepare('INSERT INTO sections (tempId, sectionName, data) VALUES (?, ?, ?) ON CONFLICT(tempId, sectionName) DO UPDATE SET data = excluded.data').run(tempId, section, JSON.stringify({ ...data, tempId }));
+  return readApplicationState(tempId);
+}
+
 // ---------- Contact Endpoints ----------
 app.post('/api/contact', (req, res) => {
-  // Create a new draft application and return tempId
-  const tempId = uuidv4();
-  const stmt = db.prepare('INSERT INTO applications (tempId, json) VALUES (?, ?)');
-  stmt.run(tempId, JSON.stringify({}));
-  res.json({ tempId });
+  const tempId = req.body?.tempId || uuidv4();
+  if (!readApplicationState(tempId)) upsertApplication(tempId, { currentSection: 'CONTACT', completedSections: [], applicationStatus: 'DRAFT' });
+  const state = saveSection(tempId, 'contact', { email: req.body?.email || '', countryCode: req.body?.countryCode || '', phone: req.body?.phone || '', emailVerified: false, phoneVerified: false });
+  res.json({ ...state, email: state.contact.email, countryCode: state.contact.countryCode, phone: state.contact.phone });
 });
 
 app.post('/api/contact/:applicationId/otp/email', (req, res) => {
@@ -70,7 +109,7 @@ app.post('/api/contact/:applicationId/otp/email', (req, res) => {
   stmt.run(applicationId, emailOtp);
   // Mock dispatch – just log
   console.log(`Mock email OTP for ${applicationId}: ${emailOtp}`);
-  res.json({ message: 'Email OTP sent' });
+  res.json({ message: 'Email OTP sent', otp: emailOtp });
 });
 
 app.post('/api/contact/:applicationId/otp/phone', (req, res) => {
@@ -79,7 +118,7 @@ app.post('/api/contact/:applicationId/otp/phone', (req, res) => {
   const stmt = db.prepare('INSERT INTO otps (applicationId, phoneOtp) VALUES (?, ?) ON CONFLICT(applicationId) DO UPDATE SET phoneOtp = excluded.phoneOtp');
   stmt.run(applicationId, phoneOtp);
   console.log(`Mock phone OTP for ${applicationId}: ${phoneOtp}`);
-  res.json({ message: 'Phone OTP sent' });
+  res.json({ message: 'Phone OTP sent', otp: phoneOtp });
 });
 
 app.post('/api/contact/:applicationId/verify', (req, res) => {
@@ -95,56 +134,35 @@ app.post('/api/contact/:applicationId/verify', (req, res) => {
   };
   // Update contact verification flags in application json if needed
   if (response.success) {
-    upsertApplication(applicationId, { contactVerified: true });
+    const applicationRow = db.prepare('SELECT tempId FROM applications WHERE id = ?').get(applicationId);
+    if (applicationRow) {
+      const state = readApplicationState(applicationRow.tempId);
+      saveSection(applicationRow.tempId, 'contact', { ...state.contact, emailVerified: true, phoneVerified: true });
+      return res.json({ ...response, ...readApplicationState(applicationRow.tempId), dispatchLog: [] });
+    }
   }
-  res.json(response);
+  res.json({ ...response, dispatchLog: [] });
 });
 
 // ---------- Application Section Endpoints ----------
-const sectionNames = [
-  'application-context',
-  'identity',
-  'passport',
-  'contact',
-  'address',
-  'family',
-  'occupation',
-  'visa-trip',
-  'previous-india-travel',
-  'travel-history',
-  'references',
-  'background-answers'
-];
-
-sectionNames.forEach(section => {
-  app.post(`/api/applications/${section}`, (req, res) => {
-    const data = req.body;
-    const tempId = data.tempId || uuidv4(); // allow client to send tempId or generate new one
-    // Store raw payload for the section
-    const stmt = db.prepare('INSERT INTO sections (tempId, sectionName, data) VALUES (?, ?, ?) ON CONFLICT(tempId, sectionName) DO UPDATE SET data = excluded.data');
-    stmt.run(tempId, section, JSON.stringify(data));
-    // Also upsert top‑level fields that exist in this section (e.g., applicant_references)
-    if (section === 'application-context' && data.applicantReferences !== undefined) {
-      // rename to snake_case column
-      upsertApplication(tempId, { applicant_references: data.applicantReferences });
-    }
-    res.json({ tempId, saved: true });
-  });
+app.post('/api/applications/application-context', (req, res) => {
+  const tempId = req.body?.tempId || uuidv4();
+  res.json(saveSection(tempId, 'application-context', req.body || {}));
+});
+app.post('/api/applications/:tempId/:section', (req, res, next) => {
+  const { tempId, section } = req.params;
+  if (section === 'submit') return next();
+  if (!sectionConfig[section]) return res.status(404).json({ error: 'Unknown application section' });
+  if (!readApplicationState(tempId)) return res.status(404).json({ error: 'Application not found' });
+  res.json(saveSection(tempId, section, req.body || {}));
 });
 
 // ---------- State Retrieval ----------
 app.get('/api/applications/:tempId', (req, res) => {
   const { tempId } = req.params;
-  const appRow = db.prepare('SELECT json FROM applications WHERE tempId = ?').get(tempId);
-  const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
-  const response = {
-    application: appRow ? JSON.parse(appRow.json) : null,
-    sections: sectionsRows.reduce((acc, cur) => {
-      acc[cur.sectionName] = JSON.parse(cur.data);
-      return acc;
-    }, {})
-  };
-  res.json(response);
+  const state = readApplicationState(tempId);
+  if (!state) return res.status(404).json({ error: 'Application not found' });
+  res.json(state);
 });
 
 // ---------- Photo Quality Checker Endpoint ----------
@@ -165,7 +183,7 @@ app.post('/api/documents/photo-check', upload.single('image'), async (req, res) 
     const prompt = `You are an automated photo quality checker for visa applications. Analyze the uploaded image and return a JSON object with the following boolean fields and a string field:\n{\n  "faceVisible": bool,\n  "faceCentered": bool,\n  "backgroundPlain": bool,\n  "resolutionAdequate": bool,\n  "hasBlurOrGlare": bool,\n  "overallPass": bool,\n  "fixInstruction": string\n}\nProvide ONLY the JSON. Do NOT add any extra commentary.`;
 
     const openAiPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini-vision',
+      model: MODEL_NAME,
       max_tokens: 500,
       temperature: 0,
       messages: [
@@ -220,7 +238,7 @@ Explain in ONE short, non-technical, simple sentence how the applicant can fix t
 Output ONLY strict JSON in the format: {"message": "string"}`;
 
     const openAiPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: MODEL_NAME,
       max_tokens: 150,
       temperature: 0.2,
       messages: [
@@ -250,7 +268,7 @@ app.post('/api/applications/:tempId/submit', (req, res) => {
 
   const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
   const sections = sectionsRows.reduce((acc, cur) => {
-    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) {}
+    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) { }
     return acc;
   }, {});
 
@@ -305,25 +323,25 @@ function getWaitTimeEstimate(visaType, purpose) {
 // ---------- Application Status Explainer Endpoint ----------
 app.get('/api/status/:finalReferenceNumber', async (req, res) => {
   const { finalReferenceNumber } = req.params;
-  
+
   let appRow = db.prepare('SELECT tempId, json FROM applications WHERE finalReferenceNumber = ?').get(finalReferenceNumber);
   if (!appRow) {
     appRow = db.prepare('SELECT tempId, json FROM applications WHERE tempId = ?').get(finalReferenceNumber);
   }
-  
+
   if (!appRow) {
     return res.status(404).json({ error: 'No application found with that reference number' });
   }
 
   let appData = {};
-  try { appData = JSON.parse(appRow.json); } catch (e) {}
+  try { appData = JSON.parse(appRow.json); } catch (e) { }
 
   const tempId = appRow.tempId;
   const status = appData.applicationStatus || 'SUBMITTED';
 
   const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
   const sections = sectionsRows.reduce((acc, cur) => {
-    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) {}
+    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) { }
     return acc;
   }, {});
 
@@ -342,7 +360,7 @@ Provide ONE warm, clear, citizen-focused sentence explaining what this status me
 Output ONLY strict JSON in format: {"explanation": "string"}`;
 
     const openAiPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: MODEL_NAME,
       max_tokens: 150,
       temperature: 0.3,
       messages: [

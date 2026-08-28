@@ -40,3 +40,11 @@
 - Step 11 (Status Page & AI Status Explainer): Added `GET /api/status/:finalReferenceNumber` endpoint with OpenAI `gpt-4o-mini` warm status explainer, synthetic wait-time lookup by visa type, raw error fallback, and standalone `StatusPage` frontend component.
 - Step 12 (Final Visual & Structural Consistency Pass): Standardized design tokens across all components (`var(--civic)`, `var(--line)`), verified disclaimer banner rendering on all views, audited 15-step progress rail, and added return navigation to `StatusPage`.
 - Files touched: `backend/server.js`, `frontend/src/errorExplainer.js`, `frontend/src/DocumentUpload.jsx`, `frontend/src/ReviewSubmit.jsx`, `frontend/src/StatusPage.jsx`, `frontend/src/App.jsx`, `changelog.md`, `decisions.md`, `flow.md`
+
+## 2026-08-28
+- Fixed the broken Save and continue flow caused by incompatible React and Express route/response contracts after the SQLite migration.
+- Added persisted step advancement and completed-section tracking, reliable resume responses, working review-summary data mapping, and a non-intercepted final-submit route.
+- Fixed simulated OTP payloads and verification handling so invalid codes do not advance the application.
+- Made Resume and Check Status touch-friendly and responsive; the navigation rail adapts from a two-column layout to an adaptive grid and finally a single column.
+- Verified: backend syntax check, production frontend build, context → identity → resume API flow, all save endpoints in order, and final submission using an isolated temporary SQLite database.
+- Files touched: `backend/server.js`, `frontend/src/App.jsx`, `frontend/src/ReviewSubmit.jsx`, `frontend/src/styles.css`, `decisions.md`, `changelog.md`, `flow.md`.

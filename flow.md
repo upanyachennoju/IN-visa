@@ -1,9 +1,11 @@
 # Flow
 
 Current state:
-- Backend Express server (`backend/server.js`) with file-based SQLite database (`data/visa_flow.db`) supports all 15 application sections, draft state, resume-by-`tempId`, `POST /api/documents/photo-check` (vision model), `POST /api/explain-error` (text model), `POST /api/applications/:tempId/submit` (cross-field validation & `IND-XXXXXX` reference generation), and `GET /api/status/:finalReferenceNumber` (warm status explainer & wait-time estimator).
-- Frontend features a complete 15-step navigation shell, AI-driven plain-language error explainers on blur/submit, Section 13 document quality checker, Section 15 review & submission screen, and standalone `StatusPage` with 100% theme consistency and universal disclaimer banner display across all screens.
-- Full system verified and ready for deployment review.
+- Backend Express server (`backend/server.js`) stores a draft and its section payloads in SQLite. Application Context creates the `tempId`; each later save uses `POST /api/applications/:tempId/:section`, marks that section complete, and returns the next section plus the complete flat application state.
+- `GET /api/applications/:tempId` uses the same state shape, so `#/app/{tempId}` resumes data and navigation consistently. Contact uses simulated OTPs; only a successful verification advances the flow to Address.
+- Final review reads the saved flat state, reconstructs its section summary, then calls `POST /api/applications/:tempId/submit`. The generic save handler explicitly passes this route through so submission is reachable.
+- The 15-step frontend includes plain-language error explainers, document quality checking, final status tracking, and responsive Resume/Check Status actions and step navigation.
+- Validation completed on 2026-08-28: backend syntax check, frontend production build, persisted save/resume flow, ordered section saves, and final submission against an isolated test database.
 
 
 

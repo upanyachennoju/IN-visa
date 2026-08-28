@@ -114,6 +114,20 @@ button:disabled {
   gap: 12px;
 }
 
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-actions .link-button {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #f8fafc;
+  white-space: nowrap;
+}
+
 h1 {
   margin: 0;
   color: var(--civic);
@@ -250,6 +264,34 @@ label {
 
 @media (max-width: 900px) {
   .shell-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-rail {
+    padding: 16px;
+  }
+
+  .step-list {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 10px;
+  }
+
+  .step-rail-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quick-actions,
+  .quick-actions .link-button {
+    width: 100%;
+  }
+
+  .step-list {
     grid-template-columns: 1fr;
   }
 }

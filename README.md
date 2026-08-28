@@ -95,7 +95,8 @@ The Vite dev server will start (typically at `http://localhost:5173`).
 | `POST` | `/api/contact/:appId/otp/email` | Send mock email OTP |
 | `POST` | `/api/contact/:appId/otp/phone` | Send mock phone OTP |
 | `POST` | `/api/contact/:appId/verify` | Verify email & phone OTPs |
-| `POST` | `/api/applications/:section` | Save section payload (context, identity, passport, etc.) |
+| `POST` | `/api/applications/application-context` | Create a draft, save Application Context, and advance to Identity |
+| `POST` | `/api/applications/:tempId/:section` | Save a later section, persist progress, and return the next section |
 | `GET` | `/api/applications/:tempId` | Retrieve full application & saved section data |
 | `POST` | `/api/documents/photo-check` | Analyze uploaded image via OpenAI Vision |
 | `POST` | `/api/explain-error` | Generate plain-language error explainer via OpenAI |

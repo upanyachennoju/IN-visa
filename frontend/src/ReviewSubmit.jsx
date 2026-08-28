@@ -17,8 +17,21 @@ export default function ReviewSubmit({ tempId, onSubmitted }) {
     fetch(`http://localhost:3000/api/applications/${tempId}`)
       .then((res) => res.json())
       .then((data) => {
-        setSections(data.sections || {});
-        setApplicationData(data.application || {});
+        setSections(data.sections || {
+          'application-context': data.applicationContext || {},
+          identity: data.identity || {},
+          passport: data.passport || {},
+          contact: data.contact || {},
+          address: data.address || {},
+          family: data.family || {},
+          occupation: data.occupation || {},
+          'visa-trip': data.visaTrip || {},
+          'previous-india-travel': data.previousIndiaTravel || {},
+          'travel-history': data.travelHistory || {},
+          references: data.references || {},
+          'background-answers': data.backgroundAnswers || {},
+        });
+        setApplicationData(data.application || data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));

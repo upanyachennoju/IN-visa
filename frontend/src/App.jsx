@@ -4,7 +4,7 @@ import ReviewSubmit from './ReviewSubmit';
 import StatusPage from './StatusPage';
 import { explainFieldErrors, getPlainLanguageError } from './errorExplainer';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'http://localhost:3000/api';
 
 const SECTION_STEPS = [
   { key: 'APPLICATION_CONTEXT', label: 'Application Context' },
@@ -789,37 +789,51 @@ export default function App() {
   }
 
   async function saveApplicationContext(event) {
-    event.preventDefault();
-    setError('');
-    const errors = validateContextForm(contextForm);
-    if (Object.keys(errors).length > 0) {
-      applyErrorExplanations('APPLICATION_CONTEXT', errors);
+  event.preventDefault();
+  setError('');
+
+  const errors = validateContextForm(contextForm);
+
+  if (Object.keys(errors).length > 0) {
+    applyErrorExplanations('APPLICATION_CONTEXT', errors);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/applications/application-context`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(contextForm),
+    });
+
+    if (!response.ok) {
+      setError('Application Context save failed.');
       return;
     }
 
-    try {
-      const response = await fetch(`${API_BASE}/applications/application-context`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contextForm),
-      });
-      if (!response.ok) {
-        setError('Application Context save failed.');
-        return;
-      }
+    const result = normalizeResponse(await response.json());
 
-      const result = normalizeResponse(await response.json());
-      setApplication(result);
-      setActiveSection(result.currentSection);
-      setContextForm(buildContextForm(result));
-      setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
-      if (result.tempId) {
-        window.location.hash = `#/app/${result.tempId}`;
-      }
-    } catch {
-      setError('Application Context save failed. Make sure the backend is running on port 8080.');
+    setApplication(result);
+
+    if (result.tempId) {
+      window.location.hash = `#/app/${result.tempId}`;
     }
+
+    setActiveSection(result.currentSection);
+
+    // setContextForm(buildContextForm(result));
+
+    setContactForm((current) => ({
+      ...current,
+      applicationId: result.applicationId
+    }));
+
+  } catch {
+    setError(
+      'Application Context save failed. Make sure the backend is running on port 3000.'
+    );
   }
+}
 
   async function saveIdentity(event) {
     event.preventDefault();
@@ -853,7 +867,7 @@ export default function App() {
       setIdentityForm(buildIdentityForm(result));
       setContactForm((current) => ({ ...current, applicationId: result.applicationId }));
     } catch {
-      setError('Identity save failed. Make sure the backend is running on port 8080.');
+      setError('Identity save failed. Make sure the backend is running on port 3000.');
     }
   }
 
@@ -1193,7 +1207,7 @@ export default function App() {
       const response = await fetch(`${API_BASE}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm),
+        body: JSON.stringify({ ...contactForm, tempId: application.tempId }),
       });
 
       if (!response.ok) {
@@ -1260,13 +1274,18 @@ export default function App() {
       }
 
       const result = await response.json();
+      if (!result.success) {
+        setVerificationResult(result);
+        setError('The OTPs do not match. Please use the codes shown above.');
+        return;
+      }
       setVerificationResult(result);
       const nextApplication = {
         ...application,
         tempId: result.tempId,
         currentSection: result.currentSection,
         completedSections: result.completedSections,
-        applicationStatus: 'SUBMITTED',
+        applicationStatus: result.applicationStatus || application.applicationStatus,
         contact: {
           ...(application.contact || {}),
           emailVerified: true,
@@ -2106,7 +2125,7 @@ export default function App() {
               <section className="section-card">
                 <h2>References</h2>
                 <form className="form-grid" onSubmit={saveReferences}>
-                  <div>
+                <div className="quick-actions">
                     <h3>India reference</h3>
                   </div>
                   <label>
