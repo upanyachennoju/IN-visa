@@ -1,8 +1,9 @@
 # Flow
 
 Current state:
-- Backend Express server (`backend/server.js`) with file-based SQLite database (`data/visa_flow.db`) supports Application Context, Identity, Passport, Address, Family, Occupation, Visa / Trip, Previous India Travel, Travel History, References, Background Answers, Contact state, resume-by-`tempId` lookup, `POST /api/documents/photo-check` quality validation, `POST /api/explain-error` AI error explainer, and `POST /api/applications/:tempId/submit` endpoint with cross-field consistency checks and `IND-XXXXXX` reference number generation.
-- Frontend has a complete 15-step application flow, including read-only section summaries, cross-field mismatch detection, mandatory declaration checkbox, final submission, and confirmation screen.
+- Backend Express server (`backend/server.js`) with file-based SQLite database (`data/visa_flow.db`) supports all 15 application sections, draft state, resume-by-`tempId`, `POST /api/documents/photo-check` (vision model), `POST /api/explain-error` (text model), `POST /api/applications/:tempId/submit` (cross-field validation & `IND-XXXXXX` reference generation), and `GET /api/status/:finalReferenceNumber` (warm status explainer & wait-time estimator).
+- Frontend features a complete 15-step navigation shell, AI-driven plain-language error explainers on blur/submit, Section 13 document quality checker, Section 15 review & submission screen, and standalone `StatusPage` accessible by final reference number (`#/status/:finalReferenceNumber`).
+
 
 
 

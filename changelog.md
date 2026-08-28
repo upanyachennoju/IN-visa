@@ -35,8 +35,9 @@
 ## 2026-08-28
 - Express & File-based SQLite Migration: Migrated backend to Express + better-sqlite3 with file-based SQLite database (`data/visa_flow.db`).
 - Step 8 (Photo Quality Checker): Added `POST /api/documents/photo-check` endpoint with OpenAI `gpt-4o-mini-vision` integration, 5s timeout fallback, and `DocumentUpload` component in Section 13 (Documents).
-- Step 10 (Review & Submit Section): Added `POST /api/applications/:tempId/submit` endpoint with server-side cross-field validation, synthetic reference number generation (`IND-XXXXXX`), read-only section summaries, declaration checkbox, and confirmation screen.
-- Files touched: `backend/server.js`, `frontend/src/ReviewSubmit.jsx`, `frontend/src/App.jsx`, `changelog.md`, `decisions.md`, `flow.md`
+- Step 11 (Status Page & AI Status Explainer): Added `GET /api/status/:finalReferenceNumber` endpoint with OpenAI `gpt-4o-mini` warm status explainer, synthetic wait-time lookup by visa type, raw error fallback, and standalone `StatusPage` frontend component.
+- Files touched: `backend/server.js`, `frontend/src/StatusPage.jsx`, `frontend/src/App.jsx`, `changelog.md`, `decisions.md`, `flow.md`
+
 
 
 

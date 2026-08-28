@@ -293,5 +293,84 @@ app.post('/api/applications/:tempId/submit', (req, res) => {
   });
 });
 
+// Helper for Wait-Time Estimate
+function getWaitTimeEstimate(visaType, purpose) {
+  const key = `${visaType || ''} ${purpose || ''}`.toLowerCase();
+  if (key.includes('medical')) return '1-2 business days';
+  if (key.includes('business')) return '2-4 business days';
+  if (key.includes('conference')) return '3-5 business days';
+  return '3-5 business days';
+}
+
+// ---------- Application Status Explainer Endpoint ----------
+app.get('/api/status/:finalReferenceNumber', async (req, res) => {
+  const { finalReferenceNumber } = req.params;
+  
+  let appRow = db.prepare('SELECT tempId, json FROM applications WHERE finalReferenceNumber = ?').get(finalReferenceNumber);
+  if (!appRow) {
+    appRow = db.prepare('SELECT tempId, json FROM applications WHERE tempId = ?').get(finalReferenceNumber);
+  }
+  
+  if (!appRow) {
+    return res.status(404).json({ error: 'No application found with that reference number' });
+  }
+
+  let appData = {};
+  try { appData = JSON.parse(appRow.json); } catch (e) {}
+
+  const tempId = appRow.tempId;
+  const status = appData.applicationStatus || 'SUBMITTED';
+
+  const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
+  const sections = sectionsRows.reduce((acc, cur) => {
+    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) {}
+    return acc;
+  }, {});
+
+  const contextData = sections['application-context'] || {};
+  const visaTripData = sections['visa-trip'] || {};
+
+  const visaType = visaTripData.visaType || contextData.passportType || '';
+  const visaPurpose = visaTripData.purpose || contextData.visaPurpose || '';
+  const waitTimeEstimate = getWaitTimeEstimate(visaType, visaPurpose);
+
+  let explanation = 'Your application has been received and is currently being processed by visa authorities.';
+
+  try {
+    const prompt = `You are a helpful and reassuring visa status assistant for citizens. An applicant's visa application currently has the internal status "${status}".
+Provide ONE warm, clear, citizen-focused sentence explaining what this status means and reassuring them about what to expect next.
+Output ONLY strict JSON in format: {"explanation": "string"}`;
+
+    const openAiPromise = openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 150,
+      temperature: 0.3,
+      messages: [
+        { role: 'system', content: 'You explain visa status enums in warm, clear, non-technical plain English. Output strict JSON only.' },
+        { role: 'user', content: prompt }
+      ]
+    });
+
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+    const result = await Promise.race([openAiPromise, timeoutPromise]);
+    const responseText = result.choices[0].message.content;
+    const parsed = JSON.parse(responseText);
+    if (parsed.explanation) {
+      explanation = parsed.explanation;
+    }
+  } catch (err) {
+    // Fallback message used if AI call fails or times out
+  }
+
+  res.json({
+    finalReferenceNumber: appData.finalReferenceNumber || finalReferenceNumber,
+    tempId,
+    applicationStatus: status,
+    explanation,
+    waitTimeEstimate,
+    submittedAt: appData.submittedAt || new Date().toISOString()
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`VisaFlow backend listening on port ${PORT}`));

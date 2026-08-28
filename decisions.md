@@ -21,7 +21,11 @@
 - Debounced and cached error explanations in `frontend/src/errorExplainer.js` — error explanations execute exclusively on field blur and section submission rather than per-keystroke to keep API traffic cheap and fast.
 - Enforced server-side cross-field consistency checks for `DOB` (Context vs Identity) and `Port of Arrival` (Context vs Visa/Trip) — mismatches block submission until resolved by the applicant.
 - Generated synthetic final reference number format `IND-XXXXXX` upon submission — confirms application finalization while keeping numbers human-readable and clean.
-- Required explicit declaration checkbox before enabling submission — ensures applicant confirmation prior to state transition to `SUBMITTED`.
+- Used OpenAI text model `gpt-4o-mini` for `GET /api/status/:finalReferenceNumber` — converts internal status enums into warm, citizen-focused sentences.
+- Seeded a synthetic wait-time estimate dictionary mapped by visa type and purpose (Medical: 1-2 days, Business: 2-4 days, Tourist/Default: 3-5 days) — provides immediate, transparent processing timelines without ML overhead.
+- Implemented static fallback handling for status explainer — if AI call or network fails, returns `"Your application has been received and is currently being processed by visa authorities."` to prevent status page disruption.
+- Exposed hash route `#/status/:finalReferenceNumber` and standalone `StatusPage` UI — accessible via navigation bar or auto-loaded from submission confirmation.
+
 
 
 

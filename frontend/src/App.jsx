@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DocumentUpload from './DocumentUpload';
 import ReviewSubmit from './ReviewSubmit';
+import StatusPage from './StatusPage';
 import { explainFieldErrors, getPlainLanguageError } from './errorExplainer';
 
 const API_BASE = 'http://localhost:8080/api';
@@ -188,6 +189,10 @@ const EMPTY_BACKGROUND_FORM = {
 
 function parseRoute() {
   const hash = window.location.hash.replace(/^#\/?/, '');
+  if (hash.startsWith('status')) {
+    const parts = hash.split('/');
+    return { view: 'status', finalRef: parts[1] ? decodeURIComponent(parts[1]) : '' };
+  }
   if (hash.startsWith('resume')) {
     return { view: 'resume' };
   }
@@ -1298,7 +1303,9 @@ export default function App() {
         SMS/WhatsApp, and email delivery are simulated for this demo.
       </div>
 
-      {route.view === 'resume' ? (
+      {route.view === 'status' ? (
+        <StatusPage initialRef={route.finalRef} />
+      ) : route.view === 'resume' ? (
         <section className="resume-card">
           <h1>Resume application</h1>
           <p className="panel-note">Re-enter your tempId to continue where you left off.</p>
@@ -1319,9 +1326,14 @@ export default function App() {
           <aside className="step-rail">
             <div className="step-rail-header">
               <h1>VisaFlow</h1>
-              <button type="button" className="link-button" onClick={() => (window.location.hash = '#/resume')}>
-                Resume application
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button type="button" className="link-button" onClick={() => (window.location.hash = '#/resume')}>
+                  Resume
+                </button>
+                <button type="button" className="link-button" onClick={() => (window.location.hash = '#/status')}>
+                  Check Status
+                </button>
+              </div>
             </div>
             <ol className="step-list">
               {SECTION_STEPS.map((step, index) => {
