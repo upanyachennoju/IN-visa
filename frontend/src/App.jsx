@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import DocumentUpload from './DocumentUpload';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -2244,6 +2245,8 @@ export default function App() {
                   <button type="submit">Save and continue</button>
                 </form>
               </section>
+            ) : activeSection === 'DOCUMENTS' ? (
+              <DocumentUpload tempId={application.tempId} />
             ) : (
               <section className="section-card placeholder-card">
                 <h2>{sectionLabel(activeSection)}</h2>

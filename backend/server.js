@@ -2,8 +2,12 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 const Database = require('better-sqlite3');
 const { v4: uuidv4 } = require('uuid');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+const { OpenAI } = require('openai');
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const app = express();
 app.use(cors());
@@ -141,6 +145,65 @@ app.get('/api/applications/:tempId', (req, res) => {
     }, {})
   };
   res.json(response);
+});
+
+// ---------- Photo Quality Checker Endpoint ----------
+app.post('/api/documents/photo-check', upload.single('image'), async (req, res) => {
+  try {
+    const { tempId } = req.body;
+    if (!tempId) {
+      return res.status(400).json({ error: 'tempId is required' });
+    }
+    const appExists = db.prepare('SELECT 1 FROM applications WHERE tempId = ?').get(tempId);
+    if (!appExists) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ error: 'Image file is required' });
+    }
+    const imageBase64 = req.file.buffer.toString('base64');
+    const prompt = `You are an automated photo quality checker for visa applications. Analyze the uploaded image and return a JSON object with the following boolean fields and a string field:\n{\n  "faceVisible": bool,\n  "faceCentered": bool,\n  "backgroundPlain": bool,\n  "resolutionAdequate": bool,\n  "hasBlurOrGlare": bool,\n  "overallPass": bool,\n  "fixInstruction": string\n}\nProvide ONLY the JSON. Do NOT add any extra commentary.`;
+
+    const openAiPromise = openai.chat.completions.create({
+      model: 'gpt-4o-mini-vision',
+      max_tokens: 500,
+      temperature: 0,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that returns strict JSON as described.' },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
+          ]
+        }
+      ]
+    });
+
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+    const result = await Promise.race([openAiPromise, timeoutPromise]);
+    const message = result.choices[0].message;
+    let data;
+    try {
+      data = JSON.parse(message.content);
+    } catch (e) {
+      throw new Error('Invalid JSON from model');
+    }
+    if (typeof data.overallPass !== 'boolean') {
+      data.overallPass = false;
+    }
+    res.json(data);
+  } catch (err) {
+    res.json({
+      faceVisible: false,
+      faceCentered: false,
+      backgroundPlain: false,
+      resolutionAdequate: false,
+      hasBlurOrGlare: false,
+      overallPass: false,
+      fixInstruction: "We couldn't check your photo automatically — please make sure your face is clearly visible against a plain background."
+    });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

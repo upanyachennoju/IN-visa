@@ -31,3 +31,9 @@
 ## 2026-08-27
 - Step 7: Added the isolated Background Questions section with yes/no controls, conditional detail textareas, and a backend save endpoint that advances to Documents without introducing any AI calls.
 - Files touched: `backend/src/main/java/com/visaflow/application/Application.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionController.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionDtos.java`, `backend/src/main/java/com/visaflow/application/ApplicationSectionService.java`, `backend/src/main/java/com/visaflow/application/ApplicationStateDtos.java`, `frontend/src/App.jsx`, `frontend/src/styles.css`
+
+## 2026-08-28
+- Express & File-based SQLite Migration: Migrated backend to Express + better-sqlite3 with file-based SQLite database (`data/visa_flow.db`).
+- Step 8 (Photo Quality Checker): Added `POST /api/documents/photo-check` endpoint with OpenAI `gpt-4o-mini-vision` integration, 5s timeout fallback, and `DocumentUpload` component in Section 13 (Documents).
+- Files touched: `backend/server.js`, `backend/package.json`, `frontend/src/DocumentUpload.jsx`, `frontend/src/App.jsx`, `changelog.md`, `decisions.md`, `flow.md`
+
