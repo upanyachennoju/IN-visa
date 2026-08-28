@@ -12,7 +12,7 @@ export async function getPlainLanguageError(field, rawError, context = '') {
   }
 
   try {
-    const res = await fetch('http://localhost:3000/api/explain-error', {
+    const res = await fetch('/api/explain-error', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ field, error: rawError, context }),
