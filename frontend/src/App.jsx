@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import DocumentUpload from './DocumentUpload';
 import ReviewSubmit from './ReviewSubmit';
 import StatusPage from './StatusPage';

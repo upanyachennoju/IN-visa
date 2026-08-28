@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 
 function SingleDocCheck({ label, tempId }) {
   const [file, setFile] = useState(null);
