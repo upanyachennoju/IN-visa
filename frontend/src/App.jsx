@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import DocumentUpload from './DocumentUpload';
+import ReviewSubmit from './ReviewSubmit';
 import { explainFieldErrors, getPlainLanguageError } from './errorExplainer';
 
 const API_BASE = 'http://localhost:8080/api';
@@ -2286,6 +2287,8 @@ export default function App() {
               </section>
             ) : activeSection === 'DOCUMENTS' ? (
               <DocumentUpload tempId={application.tempId} />
+            ) : activeSection === 'SUBMISSION' ? (
+              <ReviewSubmit tempId={application.tempId} application={application} />
             ) : (
               <section className="section-card placeholder-card">
                 <h2>{sectionLabel(activeSection)}</h2>

@@ -240,5 +240,58 @@ Output ONLY strict JSON in the format: {"message": "string"}`;
   }
 });
 
+// ---------- Application Submit Endpoint ----------
+app.post('/api/applications/:tempId/submit', (req, res) => {
+  const { tempId } = req.params;
+  const appRow = db.prepare('SELECT json FROM applications WHERE tempId = ?').get(tempId);
+  if (!appRow) {
+    return res.status(404).json({ error: 'Application not found' });
+  }
+
+  const sectionsRows = db.prepare('SELECT sectionName, data FROM sections WHERE tempId = ?').all(tempId);
+  const sections = sectionsRows.reduce((acc, cur) => {
+    try { acc[cur.sectionName] = JSON.parse(cur.data); } catch (e) {}
+    return acc;
+  }, {});
+
+  const errors = [];
+  const contextData = sections['application-context'] || {};
+  const identityData = sections['identity'] || {};
+  const visaTripData = sections['visa-trip'] || {};
+
+  // Cross-Field Consistency Checks
+  if (contextData.dateOfBirth && identityData.dob && contextData.dateOfBirth !== identityData.dob) {
+    errors.push(`Date of Birth mismatch: Application Context has "${contextData.dateOfBirth}" but Identity section has "${identityData.dob}".`);
+  }
+
+  if (contextData.portOfArrival && visaTripData.portOfArrival && contextData.portOfArrival.trim().toLowerCase() !== visaTripData.portOfArrival.trim().toLowerCase()) {
+    errors.push(`Port of Arrival mismatch: Application Context has "${contextData.portOfArrival}" but Visa Trip section has "${visaTripData.portOfArrival}".`);
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  // Generate synthetic final reference number: IND-XXXXXX
+  const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const finalReferenceNumber = `IND-${randomStr}`;
+
+  upsertApplication(tempId, {
+    applicationStatus: 'SUBMITTED',
+    finalReferenceNumber,
+    submittedAt: new Date().toISOString()
+  });
+
+  const stmt = db.prepare('UPDATE applications SET finalReferenceNumber = ? WHERE tempId = ?');
+  stmt.run(finalReferenceNumber, tempId);
+
+  res.json({
+    success: true,
+    tempId,
+    finalReferenceNumber,
+    applicationStatus: 'SUBMITTED'
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`VisaFlow backend listening on port ${PORT}`));
