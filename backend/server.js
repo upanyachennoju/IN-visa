@@ -1,4 +1,5 @@
 // server.js
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -6,7 +7,7 @@ const multer = require('multer');
 const Database = require('better-sqlite3');
 const { v4: uuidv4 } = require('uuid');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
-const path = require('path');
+
 try {
   require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
   require('dotenv').config();
@@ -388,6 +389,16 @@ Output ONLY strict JSON in format: {"explanation": "string"}`;
     waitTimeEstimate,
     submittedAt: appData.submittedAt || new Date().toISOString()
   });
+});
+
+// Serve React frontend
+const frontendPath = path.join(__dirname, '../frontend/dist');
+
+app.use(express.static(frontendPath));
+
+// React Router fallback
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
