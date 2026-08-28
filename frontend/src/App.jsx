@@ -4,7 +4,7 @@ import ReviewSubmit from './ReviewSubmit';
 import StatusPage from './StatusPage';
 import { explainFieldErrors, getPlainLanguageError } from './errorExplainer';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'http://localhost:3000/api';
 
 const SECTION_STEPS = [
   { key: 'APPLICATION_CONTEXT', label: 'Application Context' },
